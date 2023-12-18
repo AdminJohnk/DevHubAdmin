@@ -115,6 +115,13 @@ export interface ICreatePost {
   visibility: Visibility;
   images?: (string | undefined)[];
 }
+export interface ICreatePostForAdmin {
+  email: string;
+  title: string;
+  content: string;
+  visibility: Visibility;
+  images?: (string | undefined)[];
+}
 
 export interface IUpdatePost {
   id: string;
@@ -150,6 +157,7 @@ export interface IPost {
     like_number: number;
     comment_number: number;
     share_number: number;
+    save_number: number;
   };
   is_liked: boolean;
   is_shared: boolean;
@@ -265,7 +273,14 @@ export interface IUpdateConversation extends IConversation {
   typeUpdate: TypeofUpdateConversation;
 }
 
-type TypeofMessage = 'text' | 'image' | 'notification' | 'audio' | 'file' | 'voice' | 'video';
+type TypeofMessage =
+  | 'text'
+  | 'image'
+  | 'notification'
+  | 'audio'
+  | 'file'
+  | 'voice'
+  | 'video';
 
 export interface IMessage {
   _id: string;
@@ -319,8 +334,15 @@ export interface ISocketCall {
 export type ModalType =
   | {
       destroy: () => void;
-      update: (configUpdate: ModalFuncProps | ((prevConfig: ModalFuncProps) => ModalFuncProps)) => void;
-      then<T>(resolve: (confirmed: boolean) => T, reject: VoidFunction): Promise<T>;
+      update: (
+        configUpdate:
+          | ModalFuncProps
+          | ((prevConfig: ModalFuncProps) => ModalFuncProps)
+      ) => void;
+      then<T>(
+        resolve: (confirmed: boolean) => T,
+        reject: VoidFunction
+      ): Promise<T>;
     }
   | undefined;
 

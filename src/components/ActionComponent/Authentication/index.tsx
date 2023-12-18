@@ -7,7 +7,9 @@ const NO_USER_ID = 'Méo có UserID!';
 
 export const NotAuth = () => {
   const location = useLocation();
-  const userID = useAppSelector((state) => state.auth.userID);
+  const userID = useAppSelector(state => state.auth.userID);
+
+  console.log('userID', userID);
 
   if (userID !== NO_USER_ID) {
     return <Navigate to='/' replace state={{ from: location }} />;
@@ -19,7 +21,7 @@ export const NotAuth = () => {
 
 export const Auth = () => {
   const location = useLocation();
-  const userID = useAppSelector((state) => state.auth.userID);
+  const userID = useAppSelector(state => state.auth.userID);
 
   if (userID === NO_USER_ID) {
     localStorage.removeItem(AUTHORIZATION);

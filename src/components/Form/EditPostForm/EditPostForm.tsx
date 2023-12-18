@@ -13,7 +13,7 @@ import { getTheme } from '@/util/theme';
 import getImageURL from '@/util/getImageURL';
 import { capitalizeFirstLetter, textToHTML } from '@/util/convertText';
 import { toolbarOptions } from '@/util/constants/SettingSystem';
-import { useUpdatePost } from '@/hooks/mutation';
+import { useUpdatePost, useUpdatePostForAdmin } from '@/hooks/mutation';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';
 import { imageService } from '@/services/ImageService';
 import { IEmoji, Visibility } from '@/types';
@@ -35,7 +35,7 @@ const EditPostForm: React.FC<IEditPost> = ({ id, title, content, image, visibili
   useAppSelector((state) => state.theme.changed);
   const { themeColorSet } = getTheme();
 
-  const { mutateUpdatePost } = useUpdatePost();
+  const { mutateUpdatePostForAdmin } = useUpdatePostForAdmin();
 
   const [contentQuill, setContentQuill] = useState(content);
   const [imageFile, setImageFile] = useState<File>();
@@ -76,7 +76,7 @@ const EditPostForm: React.FC<IEditPost> = ({ id, title, content, image, visibili
         // if (image) await handleRemoveImage(image);
       }
 
-      mutateUpdatePost({
+      mutateUpdatePostForAdmin({
         id: id,
         postUpdate: {
           ...values,

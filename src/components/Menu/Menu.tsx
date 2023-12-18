@@ -1,15 +1,15 @@
 import {
-  faBookmark,
-  faBriefcase,
-  faGlobe,
+  faMessage,
+  faImage,
   faHouse,
-  faMaximize,
+  faPeopleRoof,
   faPeopleGroup,
   faUser,
-  faBars
+  faNewspaper,
+  faComments
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Menu, Layout } from 'antd';
+import { Menu, Layout, Row, Col, Avatar } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from 'react-responsive';
@@ -25,7 +25,7 @@ const MenuMain = () => {
   const location = useLocation();
 
   // Lấy theme từ LocalStorage chuyển qua css
-  useAppSelector((state) => state.theme.changed);
+  useAppSelector(state => state.theme.changed);
   const { themeColorSet } = getTheme();
 
   const { currentUserInfo } = useCurrentUserInfo();
@@ -50,14 +50,13 @@ const MenuMain = () => {
   useEffect(() => {
     const path = location.pathname;
     const pathMap: Record<string, string> = {
-      '/': '1',
-      '/me': '2',
-      [`/user/${currentUserInfo._id}`]: '2',
-      '/explore': '3',
-      '/collaboration': '4',
-      '/work': '5',
-      '/bookmark': '6',
-      '/community': '7'
+      '/dashboard': '1',
+      '/admin/users': '2',
+      '/admin/posts': '3',
+      '/admin/comments': '4',
+      '/admin/conversations': '5',
+      '/admin/communities': '6',
+      '/admin/images': '7'
     };
     setKey(pathMap[path] ?? '');
   }, [location.pathname]);
@@ -79,171 +78,124 @@ const MenuMain = () => {
 
   return (
     <StyleProvider theme={themeColorSet}>
-      <div
-        className={isXsScreen ? 'showMenuButton text-3xl' : 'hidden'}
-        onClick={handleShowMenu}
-        style={{
-          color: themeColorSet.colorText1,
-          position: 'fixed',
-          left: 10,
-          top: 20,
-          zIndex: 1000
-        }}>
-        <FontAwesomeIcon icon={faBars} />
-      </div>
       <Layout.Sider
         trigger={null}
         collapsible
-        collapsed={collapsed}
-        width={200}
+        collapsed={false}
+        width={250}
         className={showMenu ? 'sider' : 'hidden'}
         style={{
           overflow: 'auto',
-          height: '100vh',
+          height: 'calc(100vh - 5rem)',
           position: 'fixed',
           left: 0,
           top: 80,
           bottom: 0,
           zIndex: 1000
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}>
+        }}>
+        <div
+          className='ps-6 py-4 flex flex-row'
+          style={{
+            backgroundColor: themeColorSet.colorBg2,
+            height: '4.5rem'
+          }}>
+          <Avatar
+            src={getImageURL(currentUserInfo?.user_image, 'avatar')}></Avatar>
+          <div className='flex flex-col'>
+            <span
+              className='ml-2 font-semibold'
+              style={{
+                color: themeColorSet.colorText1
+              }}>
+              {currentUserInfo?.name}
+            </span>
+            <span
+              className='ml-2 text-xs'
+              style={{
+                color: themeColorSet.colorText3
+              }}>
+              {currentUserInfo?.experiences[0]?.position_name}
+            </span>
+          </div>
+        </div>
         <Menu
           mode='inline'
           selectedKeys={[key]}
-          style={{ borderInlineEnd: 'none', backgroundColor: themeColorSet.colorBg1 }}
-          className='min-h-full max-h-fit'
+          style={{
+            borderInlineEnd: 'none',
+            backgroundColor: themeColorSet.colorBg2,
+            height: 'calc(100vh - 9.5rem)'
+          }}
           items={[
             {
               key: '1',
               icon: <FontAwesomeIcon className='icon' icon={faHouse} />,
-              label: 'Home',
+              label: 'Dashboard',
               title: '',
               onClick: () => {
-                navigate('/');
+                navigate('/dashboard');
                 if (isXsScreen) setShowMenu(false);
               }
             },
             {
               key: '2',
-              icon: currentUserInfo.user_image ? (
-                <img
-                  className='icon h-4 w-4 rounded-full overflow-hidden'
-                  src={getImageURL(currentUserInfo.user_image, 'avatar_mini')}
-                />
-              ) : (
-                <FontAwesomeIcon className='icon' icon={faUser} />
-              ),
-              label: currentUserInfo.name,
+              icon: <FontAwesomeIcon className='icon' icon={faUser} />,
+              label: 'Users',
               title: '',
               onClick: () => {
-                navigate(`/user/${currentUserInfo._id}`);
+                navigate('/admin/users');
                 if (isXsScreen) setShowMenu(false);
               }
             },
             {
               key: '3',
-              icon: <FontAwesomeIcon className='icon' icon={faMaximize} />,
-              label: 'Explore',
-              title: ''
-            },
-            {
-              key: '4',
-              icon: <FontAwesomeIcon className='icon' icon={faGlobe} />,
-              label: 'Collaborations',
-              title: ''
-            },
-            {
-              key: '5',
-              icon: <FontAwesomeIcon className='icon' icon={faBriefcase} />,
-              label: 'Works',
-              title: ''
-            },
-            {
-              key: '6',
-              icon: <FontAwesomeIcon className='icon' icon={faBookmark} />,
-              label: 'Bookmarks',
-              title: ''
-            },
-            {
-              key: '7',
-              icon: <FontAwesomeIcon className='icon' icon={faPeopleGroup} />,
-              label: 'All Communities',
-              title: ''
-            },
-            {
-              type: 'divider',
-              style: {
-                backgroundColor: themeColorSet.colorBgReverse4,
-                height: '1px'
+              icon: <FontAwesomeIcon className='icon' icon={faNewspaper} />,
+              label: 'Posts',
+              title: '',
+              onClick: () => {
+                navigate('/admin/posts');
+                if (isXsScreen) setShowMenu(false);
               }
             },
             {
-              key: '8',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/javascript.png' />,
-              label: 'Javascript',
-              title: ''
+              key: '4',
+              icon: <FontAwesomeIcon className='icon' icon={faComments} />,
+              label: 'Comments',
+              title: '',
+              onClick: () => {
+                navigate('/admin/comments');
+                if (isXsScreen) setShowMenu(false);
+              }
             },
             {
-              key: '9',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/graphQL.png' />,
-              label: 'GraphQL',
-              title: ''
+              key: '5',
+              icon: <FontAwesomeIcon className='icon' icon={faMessage} />,
+              label: 'Conversations',
+              title: '',
+              onClick: () => {
+                navigate('/admin/conversations');
+                if (isXsScreen) setShowMenu(false);
+              }
             },
             {
-              key: '10',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/git.png' />,
-              label: 'Git',
-              title: ''
+              key: '6',
+              icon: <FontAwesomeIcon className='icon' icon={faPeopleRoof} />,
+              label: 'Communities',
+              title: '',
+              onClick: () => {
+                navigate('/admin/communities');
+                if (isXsScreen) setShowMenu(false);
+              }
             },
             {
-              key: '11',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/github.png' />,
-              label: 'Github',
-              title: ''
-            },
-
-            {
-              key: '12',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/python.png' />,
-              label: 'Python',
-              title: ''
-            },
-            {
-              key: '13',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/reactjs.png' />,
-              label: 'React',
-              title: ''
-            },
-            {
-              key: '14',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/python.png' />,
-              label: 'Python',
-              title: ''
-            },
-            {
-              key: '15',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/reactjs.png' />,
-              label: 'React',
-              title: ''
-            },
-            {
-              key: '16',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/python.png' />,
-              label: 'Python',
-              title: ''
-            },
-            {
-              key: '17',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/reactjs.png' />,
-              label: 'React',
-              title: ''
-            },
-            {
-              key: '18',
-              icon: <img className='h-4 w-4' src='/images/MainLayout/Sider/reactjs.png' />,
-              label: 'React',
-              title: ''
+              key: '7',
+              icon: <FontAwesomeIcon className='icon' icon={faImage} />,
+              label: 'Images',
+              title: '',
+              onClick: () => {
+                navigate('/admin/images');
+                if (isXsScreen) setShowMenu(false);
+              }
             }
           ]}
         />

@@ -11,10 +11,19 @@ import {
   RESET_PASSWORD_SAGA,
   VERIFY_CODE_SAGA
 } from '@/redux/ActionSaga/AuthActionSaga';
-import { setErrorLogin, setErrorRegister, setLoading } from '@/redux/Slice/AuthSlice';
+import {
+  setErrorLogin,
+  setErrorRegister,
+  setLoading
+} from '@/redux/Slice/AuthSlice';
 
 import { authService } from '@/services/AuthService';
-import { STATUS_CODE, AUTHORIZATION, GITHUB_TOKEN, CLIENT_ID } from '@/util/constants/SettingSystem';
+import {
+  STATUS_CODE,
+  AUTHORIZATION,
+  GITHUB_TOKEN,
+  CLIENT_ID
+} from '@/util/constants/SettingSystem';
 
 // LoginSaga
 function* LoginSaga({ payload }: any) {
@@ -25,7 +34,7 @@ function* LoginSaga({ payload }: any) {
       localStorage.setItem(AUTHORIZATION, data.metadata.tokens.accessToken);
       localStorage.setItem(CLIENT_ID, data.metadata.user._id);
 
-      const { location } = yield select((state) => state.hook);
+      const { location } = yield select(state => state.hook);
 
       const state = location.state as { from: Location };
       const from = state?.from?.pathname ?? '/';
@@ -47,11 +56,7 @@ function* RegisterSaga({ payload }: any) {
   try {
     const { data, status } = yield call(authService.register, payload);
     if (status === STATUS_CODE.CREATED) {
-      // Lưu token vào localStorage
-      localStorage.setItem(AUTHORIZATION, data.metadata.tokens.accessToken);
-      localStorage.setItem(CLIENT_ID, data.metadata.user._id);
-
-      window.location.replace('/');
+      yield put(setLoading(false));
     }
   } catch (err: any) {
     yield put(setLoading(false));
@@ -91,7 +96,7 @@ function* LoginWithGoogleSaga({ payload }: any) {
       // Lưu token vào localStorage
       localStorage.setItem(AUTHORIZATION, data.metadata?.accessToken);
 
-      const { location } = yield select((state) => state.hook);
+      const { location } = yield select(state => state.hook);
 
       const state = location.state as { from: Location };
       const from = state?.from.pathname ?? '/';
@@ -112,7 +117,7 @@ function* ForgotPasswordSaga({ payload }: any) {
   try {
     const { status } = yield call(authService.forgotPassword, payload);
     if (status === STATUS_CODE.SUCCESS) {
-      const { navigate } = yield select((state) => state.hook);
+      const { navigate } = yield select(state => state.hook);
 
       navigate({
         pathname: '/verify',
@@ -135,7 +140,7 @@ function* VerifyCodeSaga({ payload }: any) {
   try {
     const { status } = yield call(authService.verifyCode, payload);
     if (status === STATUS_CODE.SUCCESS) {
-      const { navigate } = yield select((state) => state.hook);
+      const { navigate } = yield select(state => state.hook);
 
       navigate({
         pathname: '/reset',
@@ -158,7 +163,7 @@ function* ResetPasswordSaga({ payload }: any) {
   try {
     const { status } = yield call(authService.resetPassword, payload);
     if (status === STATUS_CODE.SUCCESS) {
-      const { navigate } = yield select((state) => state.hook);
+      const { navigate } = yield select(state => state.hook);
 
       navigate('/login');
     }
@@ -178,12 +183,12 @@ function* CheckVerifyCodeSaga({ payload }: any) {
     if (status === STATUS_CODE.SUCCESS) {
       // Do nothing
     } else {
-      const { navigate } = yield select((state) => state.hook);
+      const { navigate } = yield select(state => state.hook);
 
       navigate('/forgot');
     }
   } catch (err: any) {
-    const { navigate } = yield select((state) => state.hook);
+    const { navigate } = yield select(state => state.hook);
 
     navigate('/forgot');
     console.log(err);
@@ -201,12 +206,12 @@ function* CheckResetPasswordSaga({ payload }: any) {
     if (status === STATUS_CODE.SUCCESS) {
       // Do nothing
     } else {
-      const { navigate } = yield select((state) => state.hook);
+      const { navigate } = yield select(state => state.hook);
 
       navigate('/forgot');
     }
   } catch (err: any) {
-    const { navigate } = yield select((state) => state.hook);
+    const { navigate } = yield select(state => state.hook);
 
     navigate('/forgot');
     console.log(err);

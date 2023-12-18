@@ -17,7 +17,13 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSnowflake } from '@fortawesome/free-solid-svg-icons';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BellOutlined, CommentOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons';
+import {
+  BellOutlined,
+  UserOutlined,
+  SearchOutlined,
+  MailOutlined,
+  PoweroffOutlined
+} from '@ant-design/icons';
 import { useMediaQuery } from 'react-responsive';
 
 import { setTheme } from '@/redux/Slice/ThemeSlice';
@@ -34,10 +40,12 @@ import StyleProvider from './cssHeaders';
 const Headers = () => {
   const navigate = useNavigate();
   // Lấy theme từ LocalStorage chuyển qua css
-  useAppSelector((state) => state.theme.changed);
+  useAppSelector(state => state.theme.changed);
   const { themeColorSet } = getTheme();
 
-  const switchTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : true;
+  const switchTheme = localStorage.getItem('theme')
+    ? localStorage.getItem('theme') === 'dark'
+    : true;
   const { currentUserInfo } = useCurrentUserInfo();
 
   // Switch theme
@@ -69,10 +77,13 @@ const Headers = () => {
     {
       key: '1',
       label: (
-        <NavLink to={`/user/${currentUserInfo._id}`}>
+        <NavLink to={`/user/${currentUserInfo?._id}`}>
           <div className='flex items-center py-1 px-1'>
             <div className='avatar relative h-9 w-9 overflow-hidden rounded-full'>
-              <img key={currentUserInfo._id} src={getImageURL(currentUserInfo.user_image, 'avatar_mini')} />
+              <img
+                key={currentUserInfo?._id}
+                src={getImageURL(currentUserInfo?.user_image, 'avatar_mini')}
+              />
             </div>
             <div className='name_career'>
               <div
@@ -81,7 +92,7 @@ const Headers = () => {
                   color: themeColorSet.colorText1,
                   fontWeight: 600
                 }}>
-                {currentUserInfo.name}
+                {currentUserInfo?.name}
               </div>
             </div>
           </div>
@@ -139,80 +150,104 @@ const Headers = () => {
 
   return (
     <ConfigProvider theme={{ token: { controlHeight: 38 } }}>
-      <Affix>
-        <StyleProvider theme={themeColorSet}>
+      <StyleProvider theme={themeColorSet}>
+        <Affix offsetTop={1}>
           <Layout.Header
             className='header xs:px-2'
             style={{
               backgroundColor: themeColorSet.colorBg2,
               height: '5rem'
             }}>
-            <Row align='middle'>
-              <Col span={isXsScreen ? 24 : 16} offset={isXsScreen ? 0 : 4}>
-                <Row align='middle'>
-                  <Col className='xs:pt-1' span={isXsScreen ? 2 : 4}>
-                    <div className='flex items-center cursor-pointer' onClick={handleClick}>
-                      <FontAwesomeIcon
-                        className='iconLogo text-3xl xs:hidden'
-                        icon={faSnowflake}
-                        style={{ color: themeColorSet.colorText1 }}
-                      />
-                      <div className='animated-word text-3xl ml-2 font-semibold'>
-                        <p className='letter'>D</p>
-                        <p className='letter'>e</p>
-                        <p className='letter'>v</p>
-                        <p className='letter'>H</p>
-                        <p className='letter'>u</p>
-                        <p className='letter'>b</p>
-                      </div>
-                    </div>
+            <Row justify={'center'} align='middle'>
+              <Col className='xs:pt-1' span={4}>
+                <div
+                  className='flex items-center cursor-pointer'
+                  onClick={handleClick}>
+                  <FontAwesomeIcon
+                    className='iconLogo text-3xl xs:hidden'
+                    icon={faSnowflake}
+                    style={{ color: themeColorSet.colorText1 }}
+                  />
+                  <div className='animated-word text-3xl ml-2 font-semibold'>
+                    <p className='letter'>D</p>
+                    <p className='letter'>e</p>
+                    <p className='letter'>v</p>
+                    <p className='letter'>H</p>
+                    <p className='letter'>u</p>
+                    <p className='letter'>b</p>
+                  </div>
+                </div>
+              </Col>
+              <Col span={11} className='px-4'>
+                <Input
+                  allowClear
+                  placeholder='Search'
+                  className='rounded-full'
+                  prefix={<SearchOutlined className='text-xl mr-1' />}
+                  style={{
+                    borderColor: themeColorSet.colorBg4
+                  }}
+                />
+              </Col>
+              <Col span={4} className='px-4'>
+                <Row>
+                  <Col span={5}>
+                    <Avatar
+                      src={getImageURL(
+                        currentUserInfo?.user_image,
+                        'avatar_mini'
+                      )}></Avatar>
                   </Col>
-                  <Col span={isXsScreen ? 9 : 15} className='px-4'>
-                    <Input
-                      allowClear
-                      placeholder='Search'
-                      className='rounded-full'
-                      prefix={<SearchOutlined className='text-xl mr-1' />}
-                    />
-                  </Col>
-                  <Col span={5} className='pl-3 xs:pl-0'>
-                    <Space size={isXsScreen ? 8 : 25}>
-                      <NavLink to='/message'>
-                        <Badge count={0}>
-                          <Avatar
-                            className='messageButton cursor-pointer'
-                            icon={<CommentOutlined className='text-xl messageButton cursor-pointer' />}
-                          />
-                        </Badge>
-                      </NavLink>
-                      <Dropdown arrow menu={{ items: itemsNoti }} trigger={['click']} placement='bottom'>
-                        <Badge count={0}>
-                          <Avatar
-                            className='notiButton cursor-pointer'
-                            icon={<BellOutlined className='text-xl' />}
-                          />
-                        </Badge>
-                      </Dropdown>
-                      <Dropdown
-                        arrow
-                        menu={{ items }}
-                        trigger={['click']}
-                        placement='bottom'
-                        overlayStyle={{ paddingTop: '0.5rem' }}>
-                        <Avatar
-                          className='avatarButton cursor-pointer'
-                          icon={<UserOutlined className='text-xl' />}
-                        />
-                      </Dropdown>
-                      <DayNightSwitch checked={switchTheme} onChange={onChange} />
-                    </Space>
+                  <Col span={19}>
+                    <span className='ml-2 font-semibold'>
+                      {' '}
+                      {currentUserInfo?.name}
+                    </span>
                   </Col>
                 </Row>
               </Col>
+              <Col span={5} className='pl-3 xs:pl-0'>
+                <Space size={25}>
+                  <NavLink to='/message'>
+                    <Badge count={0}>
+                      <Avatar
+                        className='messageButton cursor-pointer'
+                        icon={
+                          <MailOutlined className='text-xl messageButton cursor-pointer' />
+                        }
+                      />
+                    </Badge>
+                  </NavLink>
+                  <Dropdown
+                    arrow
+                    menu={{ items: itemsNoti }}
+                    trigger={['click']}
+                    placement='bottom'>
+                    <Badge count={0}>
+                      <Avatar
+                        className='notiButton cursor-pointer'
+                        icon={<BellOutlined className='text-xl' />}
+                      />
+                    </Badge>
+                  </Dropdown>
+                  <Dropdown
+                    arrow
+                    menu={{ items }}
+                    trigger={['click']}
+                    placement='bottom'
+                    overlayStyle={{ paddingTop: '0.5rem' }}>
+                    <Avatar
+                      className='avatarButton cursor-pointer'
+                      icon={<PoweroffOutlined className='text-xl' />}
+                    />
+                  </Dropdown>
+                  <DayNightSwitch checked={switchTheme} onChange={onChange} />
+                </Space>
+              </Col>
             </Row>
           </Layout.Header>
-        </StyleProvider>
-      </Affix>
+        </Affix>
+      </StyleProvider>
     </ConfigProvider>
   );
 };

@@ -1,4 +1,4 @@
-import { ConfigProvider, FloatButton, Layout } from 'antd';
+import { Affix, ConfigProvider, FloatButton, Layout } from 'antd';
 
 import Headers from '@/components/Headers';
 import LoadingLogo from '@/components/Loading/LoadingLogo';
@@ -14,7 +14,7 @@ interface IMainLayout {
 
 const MainLayout = ({ Component }: IMainLayout) => {
   // Lấy theme từ LocalStorage chuyển qua css
-  useAppSelector((state) => state.theme.changed);
+  useAppSelector(state => state.theme.changed);
   const { themeColor, themeColorSet } = getTheme();
 
   const { isLoadingCurrentUserInfo } = useCurrentUserInfo();
@@ -27,12 +27,14 @@ const MainLayout = ({ Component }: IMainLayout) => {
         <LoadingLogo />
       ) : (
         <StyleProvider theme={themeColorSet}>
-          <Layout hasSider>
+          <Layout>
             <Menu />
             <Layout>
               <Headers />
               <FloatButton.BackTop />
-              <Layout.Content className='xs:ml-0 ml-20'>{Component}</Layout.Content>
+              <Layout.Content style={{
+                marginLeft: '250px'
+              }}>{Component}</Layout.Content>
             </Layout>
           </Layout>
         </StyleProvider>

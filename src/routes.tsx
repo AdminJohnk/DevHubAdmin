@@ -10,12 +10,44 @@ import SelectFollow from '@/pages/SelectFollow';
 import SelectCommunity from '@/pages/SelectCommunity';
 import GetStarted from '@/pages/GetStarted';
 import NotFound404 from '@/pages/NotFound404';
+import DashBoard from '@/pages/DashBoard';
+import User from '@/pages/User';
+import Comment from '@/pages/Comment';
 
 import { VoiceCall, VideoCall } from '@/components/ChatComponents/MessageCall';
 
 import MainLayout from '@/layouts/MainLayout';
+import Post from './pages/Post';
 
 export const privateRoutes = [
+  {
+    path: '/dashboard',
+    element: <MainLayout Component={<DashBoard />} />
+  },
+  {
+    path: '/admin/users',
+    element: <MainLayout Component={<User />} />
+  },
+  {
+    path: '/admin/posts',
+    element: <MainLayout Component={<Post />} />
+  },
+  {
+    path: '/admin/comments',
+    element: <MainLayout Component={<Comment />} />
+  },
+  {
+    path: '/admin/conversations',
+    element: <MainLayout Component={<User />} />
+  },
+  {
+    path: '/admin/communities',
+    element: <MainLayout Component={<User />} />
+  },
+  {
+    path: '/admin/images',
+    element: <MainLayout Component={<User />} />
+  },
   {
     path: '/',
     element: <MainLayout Component={<NewsFeed />} />

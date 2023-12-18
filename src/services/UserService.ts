@@ -8,13 +8,19 @@ class UserService extends BaseService {
     super();
   }
 
-  updateUser = (userUpdate: IUserUpdate): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
+  updateUser = (
+    userUpdate: IUserUpdate
+  ): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
     return this.put(`/users/update`, userUpdate);
   };
-  getFollowers = (userID: string): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
+  getFollowers = (
+    userID: string
+  ): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
     return this.get(`/users/followers/${userID}`);
   };
-  getFollowing = (userID: string): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
+  getFollowing = (
+    userID: string
+  ): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
     return this.get(`/users/following/${userID}`);
   };
   getShouldFollow = (): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
@@ -23,14 +29,23 @@ class UserService extends BaseService {
   getUserInfo = (): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
     return this.get(`/users/me`);
   };
-  getUserInfoByID = (userID: string): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
+  getUserInfoByID = (
+    userID: string
+  ): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
     return this.get(`/users/find/${userID}`);
   };
   followUser = (userID: string): Promise<AxiosResponse<IResponse<boolean>>> => {
     return this.put(`/users/follow/${userID}`, '');
   };
-  getRepositoryGithub = (): Promise<AxiosResponse<IResponse<IRepository[]>>> => {
+  getRepositoryGithub = (): Promise<
+    AxiosResponse<IResponse<IRepository[]>>
+  > => {
     return this.getGithub(`/users/repositories`);
+  };
+  checkExistEmail = (
+    email: string
+  ): Promise<AxiosResponse<IResponse<boolean>>> => {
+    return this.put(`/users/checkemail/${email}`);
   };
 }
 

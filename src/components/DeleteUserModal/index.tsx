@@ -2,24 +2,31 @@ import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Modal, notification } from 'antd';
 
-import { ButtonActiveHover, ButtonCancelHover } from '@/components/MiniComponent';
-import { useDeletePost, useDeletePostForAdmin } from '@/hooks/mutation';
+import {
+  ButtonActiveHover,
+  ButtonCancelHover
+} from '@/components/MiniComponent';
+import { useDeletePost, useDeleteUserForAdmin } from '@/hooks/mutation';
 import { commonColor } from '@/util/cssVariable';
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 interface IDeleteModalProps {
   isOpen: boolean;
-  postID: string;
+  userID: string;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  image?: string[];
 }
 
-const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpen }) => {
-  const { isLoadingDeletePostForAdmin, mutateDeletePostForAdmin } = useDeletePostForAdmin();
+const DeleteUserModal: React.FC<IDeleteModalProps> = ({
+  userID,
+  isOpen,
+  setIsOpen
+}) => {
+  const { mutateDeleteUserForAdmin, isLoadingDeleteUserForAdmin } =
+    useDeleteUserForAdmin();
 
   const handleOk = () => {
-    mutateDeletePostForAdmin(postID);
+    mutateDeleteUserForAdmin(userID);
     setIsOpen(false);
     openNotificationWithIcon('success');
   };
@@ -28,7 +35,7 @@ const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpe
     setIsOpen(false);
   };
 
-  // Notification delete post
+  // Notification delete user
   const [api, contextHolder] = notification.useNotification();
   const openNotificationWithIcon = (type: NotificationType) => {
     api[type]({
@@ -48,7 +55,7 @@ const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpe
               icon={faTriangleExclamation}
               style={{ color: commonColor.colorWarning1 }}
             />
-            <span>Are you sure delete this post?</span>
+            <span>Are you sure delete this user?</span>
           </>
         }
         open={isOpen}
@@ -57,7 +64,7 @@ const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpe
           <div className='flex justify-end'>
             <ButtonCancelHover
               className='mr-4'
-              disabled={isLoadingDeletePostForAdmin}
+              disabled={isLoadingDeleteUserForAdmin}
               onClick={() => {
                 handleCancel();
               }}>
@@ -65,19 +72,18 @@ const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpe
             </ButtonCancelHover>
 
             <ButtonActiveHover
-              loading={isLoadingDeletePostForAdmin}
+              loading={isLoadingDeleteUserForAdmin}
               onClick={() => {
                 handleOk();
-              }}
-              >
+              }}>
               Delete
             </ButtonActiveHover>
           </div>
         }>
-        <p>You will not be able to recover the post after deleted!</p>
+        <p>You will not be able to recover the user after deleted!</p>
       </Modal>
     </>
   );
 };
 
-export default DeletePostModal;
+export default DeleteUserModal;

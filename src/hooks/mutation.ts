@@ -1,7 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  useMutation,
+  useQueryClient
+} from '@tanstack/react-query';
 
 import { closeDrawer, setLoading } from '@/redux/Slice/DrawerHOCSlice';
+import { closeModal } from '@/redux/Slice/ModalHOCSlice';
+import {
+  setLoading as setLoadingAuth,
+} from '@/redux/Slice/AuthSlice';
 import { postService } from '@/services/PostService';
 import { userService } from '@/services/UserService';
 import {
@@ -9,6 +17,7 @@ import {
   ICreateComment,
   ICreateLikeComment,
   ICreatePost,
+  ICreatePostForAdmin,
   IMessage,
   IPost,
   ISharePost,
@@ -16,20 +25,49 @@ import {
   IUpdateConversation,
   IUpdatePost,
   IUserInfo,
+  IUserRegister,
   IUserUpdate
 } from '@/types';
 import { useAppDispatch, useAppSelector } from './special';
 import { messageService } from '@/services/MessageService';
 import { Socket } from '@/util/constants/SettingSystem';
+import { adminService } from '@/services/AdminService';
 
 // ----------------------------- MUTATIONS -----------------------------
+
+export const useCreateUserForAdmin = () => {
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async (userRegister: IUserRegister) => {
+      const { data } = await adminService.registerUserForAdmin(userRegister);
+      return data.metadata;
+    },
+    onSuccess() {
+      dispatch(closeModal());
+      dispatch(setLoadingAuth(false));
+      queryClient.invalidateQueries({ queryKey: ['userForAdmin'] });
+    },
+    onError() {
+      dispatch(closeModal());
+      dispatch(setLoadingAuth(false));
+    }
+  });
+  return {
+    mutateCreateUserForAdmin: mutate,
+    isLoadingCreateUserForAdmin: isPending,
+    isErrorCreateUserForAdmin: isError,
+    isSuccessCreateUserForAdmin: isSuccess
+  };
+};
 
 /**
  * The `useCreatePost` function is a custom hook that handles the creation of a new post, including
  * making an API request and updating the query data for the user's posts and the newsfeed.
  */
 export const useCreatePost = () => {
-  const uid = useAppSelector((state) => state.auth.userID);
+  const uid = useAppSelector(state => state.auth.userID);
 
   const queryClient = useQueryClient();
 
@@ -51,6 +89,27 @@ export const useCreatePost = () => {
     isSuccessCreatePost: isSuccess
   };
 };
+
+export const createPostForAdmin = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess, error } = useMutation({
+    mutationFn: async (newPost: ICreatePostForAdmin) => {
+      const { data } = await adminService.createPostForAdmin(newPost);
+      return data.metadata;
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['postForAdmin'] });
+    }
+  });
+  return {
+    mutateCreatePostForAdmin: mutate,
+    isLoadingCreatePostForAdmin: isPending,
+    isErrorCreatePostForAdmin: isError,
+    errorCreatePostForAdmin: error,
+    isSuccessCreatePostForAdmin: isSuccess
+  };
+}
 
 /**
  * The `useViewPost` function is a custom hook that handles the logic for viewing a post, including
@@ -88,11 +147,15 @@ export const useUpdatePost = () => {
       dispatch(setLoading(false));
       dispatch(closeDrawer());
 
-      queryClient.invalidateQueries({ queryKey: ['posts', updatedPost.post_attributes.user._id] });
+      queryClient.invalidateQueries({
+        queryKey: ['posts', updatedPost.post_attributes.user._id]
+      });
 
-      queryClient.invalidateQueries({ queryKey: ['allNewsfeedPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['postForAdmin'] });
 
-      void queryClient.invalidateQueries({ queryKey: ['post', updatedPost._id] });
+      void queryClient.invalidateQueries({
+        queryKey: ['post', updatedPost._id]
+      });
     }
   });
   return {
@@ -103,6 +166,43 @@ export const useUpdatePost = () => {
   };
 };
 
+export const useUpdatePostForAdmin = () => {
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    // mutationFn: async (post: IUpdatePost) => {
+    //   const { data } = await adminService.updatePostForAdmin(post);
+    //   return data.metadata;
+    // },
+    mutationFn: async (post: IUpdatePost) => {
+      console.log(post);
+      const { data } = await adminService.updatePostForAdmin(post.id, post.postUpdate);
+      return data.metadata;
+    },
+    onSuccess(updatedPost) {
+      dispatch(setLoading(false));
+      dispatch(closeDrawer());
+
+      queryClient.invalidateQueries({
+        queryKey: ['posts', updatedPost.post_attributes.user._id]
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['postForAdmin'] });
+
+      void queryClient.invalidateQueries({
+        queryKey: ['post', updatedPost._id]
+      });
+    }
+  });
+  return {
+    mutateUpdatePostForAdmin: mutate,
+    isLoadingUpdatePostForAdmin: isPending,
+    isErrorUpdatePostForAdmin: isError,
+    isSuccessUpdatePostForAdmin: isSuccess
+  };
+}
+
 /**
  * The `useDeletePost` function is a custom hook that handles the deletion of a post and invalidates
  * the relevant query caches upon success.
@@ -110,7 +210,7 @@ export const useUpdatePost = () => {
 export const useDeletePost = () => {
   const queryClient = useQueryClient();
 
-  const uid = useAppSelector((state) => state.auth.userID);
+  const uid = useAppSelector(state => state.auth.userID);
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (postID: string) => {
@@ -127,6 +227,44 @@ export const useDeletePost = () => {
     isLoadingDeletePost: isPending,
     isErrorDeletePost: isError,
     isSuccessDeletePost: isSuccess
+  };
+};
+
+export const useDeletePostForAdmin = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async (postID: string) => {
+      await adminService.deletePostForAdmin(postID);
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['postForAdmin'] });
+    }
+  });
+  return {
+    mutateDeletePostForAdmin: mutate,
+    isLoadingDeletePostForAdmin: isPending,
+    isErrorDeletePostForAdmin: isError,
+    isSuccessDeletePostForAdmin: isSuccess
+  };
+}
+
+export const useDeleteUserForAdmin = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async (userID: string) => {
+      await adminService.deleteUserForAdmin(userID);
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['userForAdmin'] });
+    }
+  });
+  return {
+    mutateDeleteUserForAdmin: mutate,
+    isLoadingDeleteUserForAdmin: isPending,
+    isErrorDeleteUserForAdmin: isError,
+    isSuccessDeleteUserForAdmin: isSuccess
   };
 };
 
@@ -165,7 +303,9 @@ export const useSharePost = () => {
       await postService.sharePost(post);
     },
     onSuccess(_, postShare) {
-      void queryClient.invalidateQueries({ queryKey: ['post', postShare.post] });
+      void queryClient.invalidateQueries({
+        queryKey: ['post', postShare.post]
+      });
     }
   });
   return {
@@ -206,23 +346,27 @@ export const useSavePost = () => {
 export const useCommentPost = () => {
   const queryClient = useQueryClient();
 
-  const uid = useAppSelector((state) => state.auth.userID);
+  const uid = useAppSelector(state => state.auth.userID);
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (commentData: ICreateComment) => {
       await postService.createComment(commentData);
     },
     onSuccess(_, newComment) {
-      void queryClient.invalidateQueries({ queryKey: ['comments', newComment.post] });
+      void queryClient.invalidateQueries({
+        queryKey: ['comments', newComment.post]
+      });
 
-      void queryClient.invalidateQueries({ queryKey: ['post', newComment.post] });
+      void queryClient.invalidateQueries({
+        queryKey: ['post', newComment.post]
+      });
 
       const updatePostData = (oldData: IPost[] | undefined) => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        return newData.map((post) => {
+        return newData.map(post => {
           if (post._id === newComment.post) {
             return {
               ...post,
@@ -236,31 +380,36 @@ export const useCommentPost = () => {
         });
       };
 
-      queryClient.setQueryData<InfiniteData<IPost[], number>>(['allNewsfeedPosts'], (oldData) => {
-        if (!oldData) return;
-        const newPages = [...oldData.pages];
-        const pageIndex = newPages.findIndex((page) => page.some((item) => item._id === newComment.post));
-        if (pageIndex !== -1) {
-          const newPage = newPages[pageIndex].map((post) => {
-            if (post._id === newComment.post) {
-              return {
-                ...post,
-                post_attributes: {
-                  ...post.post_attributes,
-                  comment_number: post.post_attributes.comment_number + 1
-                }
-              };
-            }
-            return post;
-          });
-          newPages[pageIndex] = newPage;
-          return {
-            ...oldData,
-            pages: newPages
-          };
+      queryClient.setQueryData<InfiniteData<IPost[], number>>(
+        ['allNewsfeedPosts'],
+        oldData => {
+          if (!oldData) return;
+          const newPages = [...oldData.pages];
+          const pageIndex = newPages.findIndex(page =>
+            page.some(item => item._id === newComment.post)
+          );
+          if (pageIndex !== -1) {
+            const newPage = newPages[pageIndex].map(post => {
+              if (post._id === newComment.post) {
+                return {
+                  ...post,
+                  post_attributes: {
+                    ...post.post_attributes,
+                    comment_number: post.post_attributes.comment_number + 1
+                  }
+                };
+              }
+              return post;
+            });
+            newPages[pageIndex] = newPage;
+            return {
+              ...oldData,
+              pages: newPages
+            };
+          }
+          return oldData;
         }
-        return oldData;
-      });
+      );
 
       queryClient.setQueryData<IPost[]>(['posts', uid], updatePostData);
     }
@@ -285,7 +434,9 @@ export const useLikeComment = () => {
       await postService.likeComment(payload.id, payload.comment);
     },
     onSuccess(_, payload) {
-      void queryClient.invalidateQueries({ queryKey: ['comments', payload.comment.post] });
+      void queryClient.invalidateQueries({
+        queryKey: ['comments', payload.comment.post]
+      });
     }
   });
   return {
@@ -308,7 +459,9 @@ export const useDislikeComment = () => {
       await postService.dislikeComment(payload.id, payload.comment);
     },
     onSuccess(_, payload) {
-      void queryClient.invalidateQueries({ queryKey: ['comments', payload.comment.post] });
+      void queryClient.invalidateQueries({
+        queryKey: ['comments', payload.comment.post]
+      });
     }
   });
   return {
@@ -323,24 +476,24 @@ export const useDislikeComment = () => {
  * The `useUpdateUser` function is a custom hook that handles updating a user's information and
  * invalidating the 'currentUserInfo' query in the query cache upon success.
  */
-export const useUpdateUser = () => {
+export const useUpdateUser = (userID: string) => {
   const queryClient = useQueryClient();
-
   const dispatch = useAppDispatch();
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationKey: ['updateUser', userID],
     mutationFn: async (user: IUserUpdate) => {
-      const { data } = await userService.updateUser(user);
+      const { data } = await adminService.updateUserForAdmin(userID, user);
       return data.metadata;
     },
     onSuccess(updatedUser) {
       dispatch(setLoading(false));
       dispatch(closeDrawer());
-      queryClient.setQueryData<IUserInfo>(['currentUserInfo'], (oldData) => {
-        if (!oldData) return;
 
-        return { ...oldData, ...updatedUser };
+      queryClient.invalidateQueries({
+        queryKey: ['otherUserInfo', updatedUser._id]
       });
+      queryClient.invalidateQueries({ queryKey: ['userForAdmin'] });
     }
   });
   return {
@@ -363,25 +516,29 @@ export const useFollowUser = () => {
       await userService.followUser(userID);
     },
     onSuccess(_, userID) {
-      queryClient.setQueryData<IUserInfo>(['currentUserInfo'], (oldData) => {
+      queryClient.setQueryData<IUserInfo>(['currentUserInfo'], oldData => {
         if (!oldData) return;
 
-        const index = oldData.following.findIndex((item) => item._id === userID);
+        const index = oldData.following.findIndex(item => item._id === userID);
         return {
           ...oldData,
           following_number: oldData.following_number + (index !== -1 ? -1 : 1)
         };
       });
 
-      queryClient.setQueryData<IUserInfo>(['otherUserInfo', userID], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<IUserInfo>(
+        ['otherUserInfo', userID],
+        oldData => {
+          if (!oldData) return;
 
-        return {
-          ...oldData,
-          follower_number: oldData.follower_number + (oldData.is_followed ? -1 : 1),
-          is_followed: !oldData.is_followed
-        };
-      });
+          return {
+            ...oldData,
+            follower_number:
+              oldData.follower_number + (oldData.is_followed ? -1 : 1),
+            is_followed: !oldData.is_followed
+          };
+        }
+      );
     }
   });
   return {
@@ -404,7 +561,7 @@ export const useSendMessage = () => {
     onSuccess(message) {
       queryClient.setQueryData<InfiniteData<IMessage[], number>>(
         ['messages', message.conversation_id],
-        (oldData) => {
+        oldData => {
           if (!oldData) return;
 
           const newPages = [...oldData.pages];
@@ -421,12 +578,14 @@ export const useSendMessage = () => {
         }
       );
 
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        const index = newData.findIndex((item) => item._id === message.conversation_id);
+        const index = newData.findIndex(
+          item => item._id === message.conversation_id
+        );
 
         if (index !== -1) {
           newData[index] = {
@@ -443,15 +602,18 @@ export const useSendMessage = () => {
         });
       });
 
-      queryClient.setQueryData<IConversation>(['conversation', message.conversation_id], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<IConversation>(
+        ['conversation', message.conversation_id],
+        oldData => {
+          if (!oldData) return;
 
-        return {
-          ...oldData,
-          lastMessage: message,
-          seen: []
-        };
-      });
+          return {
+            ...oldData,
+            lastMessage: message,
+            seen: []
+          };
+        }
+      );
     }
   });
   return {
@@ -470,7 +632,10 @@ export const useSendMessage = () => {
  * represents the ID of the conversation for which the message is being received. If provided, it is
  * used to determine whether to play a sound notification or not.
  */
-export const useReceiveMessage = (currentUserID: string, conversationID?: string) => {
+export const useReceiveMessage = (
+  currentUserID: string,
+  conversationID?: string
+) => {
   const NotiMessage = new Audio('/sounds/sound-noti-message.wav');
   const PopMessage = new Audio('/sounds/bubble-popping-short.mp3');
   NotiMessage.volume = 0.3;
@@ -480,16 +645,19 @@ export const useReceiveMessage = (currentUserID: string, conversationID?: string
   const { mutate, isPending, isError, isSuccess, variables } = useMutation({
     mutationFn: async (message: IMessage) => await Promise.resolve(message),
     onSuccess(message) {
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        const index = newData.findIndex((item) => item._id === message.conversation_id);
+        const index = newData.findIndex(
+          item => item._id === message.conversation_id
+        );
 
         if (index !== -1) {
           if (currentUserID !== message.sender._id) {
-            if (conversationID === message.conversation_id) void PopMessage.play();
+            if (conversationID === message.conversation_id)
+              void PopMessage.play();
             else void NotiMessage.play();
           }
 
@@ -509,26 +677,31 @@ export const useReceiveMessage = (currentUserID: string, conversationID?: string
         return newData;
       });
 
-      queryClient.setQueryData<IConversation>(['conversation', message.conversation_id], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<IConversation>(
+        ['conversation', message.conversation_id],
+        oldData => {
+          if (!oldData) return;
 
-        return {
-          ...oldData,
-          lastMessage: message,
-          seen: []
-        };
-      });
+          return {
+            ...oldData,
+            lastMessage: message,
+            seen: []
+          };
+        }
+      );
 
       queryClient.setQueryData<InfiniteData<IMessage[], number>>(
         ['messages', message.conversation_id],
-        (oldData) => {
+        oldData => {
           if (!oldData) return;
           const newPages = [...oldData.pages];
 
-          const pageIndex = newPages.findIndex((page) => page.some((item) => item._id === message._id));
+          const pageIndex = newPages.findIndex(page =>
+            page.some(item => item._id === message._id)
+          );
 
           if (pageIndex !== -1) {
-            const newPage = newPages[pageIndex].map((msg) => {
+            const newPage = newPages[pageIndex].map(msg => {
               if (msg._id === message._id) {
                 return { ...msg, isSending: false };
               }
@@ -574,14 +747,15 @@ export const useReceiveConversation = () => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, isSuccess, variables } = useMutation({
-    mutationFn: async (conversation: IConversation) => await Promise.resolve(conversation),
+    mutationFn: async (conversation: IConversation) =>
+      await Promise.resolve(conversation),
     onSuccess(conversation) {
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        const index = newData.findIndex((item) => item._id === conversation._id);
+        const index = newData.findIndex(item => item._id === conversation._id);
 
         if (index !== -1) {
           newData[index] = {
@@ -590,7 +764,9 @@ export const useReceiveConversation = () => {
           };
 
           newData.sort((a, b) => {
-            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+            return (
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            );
           });
         } else {
           newData.unshift(conversation);
@@ -618,14 +794,15 @@ export const useReceiveSeenConversation = () => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, isSuccess, variables } = useMutation({
-    mutationFn: async (conversation: IConversation) => await Promise.resolve(conversation),
+    mutationFn: async (conversation: IConversation) =>
+      await Promise.resolve(conversation),
     onSuccess(conversation) {
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        const index = newData.findIndex((item) => item._id === conversation._id);
+        const index = newData.findIndex(item => item._id === conversation._id);
 
         if (index !== -1) {
           newData[index] = {
@@ -637,14 +814,17 @@ export const useReceiveSeenConversation = () => {
         return newData;
       });
 
-      queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<IConversation>(
+        ['conversation', conversation._id],
+        oldData => {
+          if (!oldData) return;
 
-        return {
-          ...oldData,
-          seen: conversation.seen
-        };
-      });
+          return {
+            ...oldData,
+            seen: conversation.seen
+          };
+        }
+      );
     }
   });
 
@@ -665,7 +845,7 @@ export const useDissolveGroup = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { chatSocket } = useAppSelector((state) => state.socketIO);
+  const { chatSocket } = useAppSelector(state => state.socketIO);
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (conversationID: string) => {
@@ -673,15 +853,19 @@ export const useDissolveGroup = () => {
       return data.metadata;
     },
     onSuccess(conversation, conversationID) {
-      if (window.location.pathname.includes(conversationID)) navigate('/message', { replace: true });
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      if (window.location.pathname.includes(conversationID))
+        navigate('/message', { replace: true });
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        return newData.filter((item) => item._id !== conversationID);
+        return newData.filter(item => item._id !== conversationID);
       });
-      queryClient.setQueryData<IConversation>(['conversation', conversationID], undefined);
+      queryClient.setQueryData<IConversation>(
+        ['conversation', conversationID],
+        undefined
+      );
 
       chatSocket.emit(Socket.DISSOLVE_GROUP, conversation);
     }
@@ -704,18 +888,23 @@ export const useReceiveDissolveGroup = () => {
   const navigate = useNavigate();
 
   const { mutate, isPending, isError, isSuccess, variables } = useMutation({
-    mutationFn: async (conversation: IConversation) => await Promise.resolve(conversation),
+    mutationFn: async (conversation: IConversation) =>
+      await Promise.resolve(conversation),
     onSuccess(conversation) {
-      if (window.location.pathname.includes(conversation._id)) navigate('/message', { replace: true });
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      if (window.location.pathname.includes(conversation._id))
+        navigate('/message', { replace: true });
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        return newData.filter((item) => item._id !== conversation._id);
+        return newData.filter(item => item._id !== conversation._id);
       });
 
-      queryClient.setQueryData<IConversation>(['conversation', conversation._id], undefined);
+      queryClient.setQueryData<IConversation>(
+        ['conversation', conversation._id],
+        undefined
+      );
     }
   });
 
@@ -736,7 +925,7 @@ export const useLeaveGroup = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { chatSocket } = useAppSelector((state) => state.socketIO);
+  const { chatSocket } = useAppSelector(state => state.socketIO);
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (conversationID: string) => {
@@ -744,15 +933,21 @@ export const useLeaveGroup = () => {
       return data.metadata;
     },
     onSuccess(conversation, conversationID) {
-      if (window.location.pathname.includes(conversationID)) navigate('/message', { replace: true });
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      if (window.location.pathname.includes(conversationID))
+        navigate('/message', { replace: true });
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
-        const newData = [...oldData].filter((item) => item._id !== conversationID);
+        const newData = [...oldData].filter(
+          item => item._id !== conversationID
+        );
 
         return newData;
       });
-      queryClient.setQueryData<IConversation>(['conversation', conversationID], undefined);
+      queryClient.setQueryData<IConversation>(
+        ['conversation', conversationID],
+        undefined
+      );
 
       chatSocket.emit(Socket.LEAVE_GROUP, conversation);
     }
@@ -774,14 +969,15 @@ export const useReceiveLeaveGroup = () => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, isSuccess, variables } = useMutation({
-    mutationFn: async (conversation: IConversation) => await Promise.resolve(conversation),
+    mutationFn: async (conversation: IConversation) =>
+      await Promise.resolve(conversation),
     onSuccess(conversation) {
-      queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
+      queryClient.setQueryData<IConversation[]>(['conversations'], oldData => {
         if (!oldData) return;
 
         const newData = [...oldData];
 
-        const index = newData.findIndex((item) => item._id === conversation._id);
+        const index = newData.findIndex(item => item._id === conversation._id);
 
         if (index !== -1) {
           newData[index] = {
@@ -793,14 +989,17 @@ export const useReceiveLeaveGroup = () => {
         return newData;
       });
 
-      queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<IConversation>(
+        ['conversation', conversation._id],
+        oldData => {
+          if (!oldData) return;
 
-        return {
-          ...oldData,
-          members: conversation.members
-        };
-      });
+          return {
+            ...oldData,
+            members: conversation.members
+          };
+        }
+      );
     }
   });
 
@@ -822,17 +1021,23 @@ export const useReceiveLeaveGroup = () => {
  * @param {string} type - The `type` parameter is a string that represents the type of message call. It
  * could be any value that you want to use to differentiate between different types of message calls.
  */
-export const useMutateMessageCall = (conversation_id: string | undefined, type: string) => {
+export const useMutateMessageCall = (
+  conversation_id: string | undefined,
+  type: string
+) => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (data: ISocketCall) => await Promise.resolve(data),
     onSuccess(data) {
-      queryClient.setQueryData<ISocketCall>(['messageCall', conversation_id, type], (oldData) => {
-        if (!oldData) return;
+      queryClient.setQueryData<ISocketCall>(
+        ['messageCall', conversation_id, type],
+        oldData => {
+          if (!oldData) return;
 
-        return { ...data };
-      });
+          return { ...data };
+        }
+      );
     }
   });
 
@@ -853,207 +1058,268 @@ export const useMutateConversation = (currentUserID: string) => {
   const navigate = useNavigate();
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
-    mutationFn: async (payload: IUpdateConversation) => await Promise.resolve(payload),
+    mutationFn: async (payload: IUpdateConversation) =>
+      await Promise.resolve(payload),
     onSuccess(conversation) {
       switch (conversation.typeUpdate) {
         case 'name':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
+              if (index !== -1) {
+                newData[index] = {
+                  ...newData[index],
+                  name: conversation.name
+                };
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
                 name: conversation.name
               };
             }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              name: conversation.name
-            };
-          });
+          );
           break;
         case 'image':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
+              if (index !== -1) {
+                newData[index] = {
+                  ...newData[index],
+                  image: conversation.image
+                };
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
                 image: conversation.image
               };
             }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              image: conversation.image
-            };
-          });
+          );
           break;
         case 'cover_image':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
+              if (index !== -1) {
+                newData[index] = {
+                  ...newData[index],
+                  cover_image: conversation.cover_image
+                };
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
                 cover_image: conversation.cover_image
               };
             }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              cover_image: conversation.cover_image
-            };
-          });
+          );
           break;
         case 'add_member':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
-                members: conversation.members
-              };
-            } else {
-              newData.unshift(conversation);
-            }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              members: conversation.members
-            };
-          });
-          break;
-        case 'remove_member':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
-
-            const newData = [...oldData];
-
-            const index = newData.findIndex((item) => item._id === conversation._id);
-
-            if (index !== -1) {
-              const isHavingMe = newData[index].members.some((item) => item._id === currentUserID);
-              const isHavingUser = conversation.members.some((item) => item._id === currentUserID);
-              if (isHavingMe && !isHavingUser) {
-                if (window.location.pathname.includes(conversation._id))
-                  navigate('/message', { replace: true });
-                newData.splice(index, 1);
-              } else {
+              if (index !== -1) {
                 newData[index] = {
                   ...newData[index],
                   members: conversation.members
                 };
+              } else {
+                newData.unshift(conversation);
               }
+
+              return newData;
             }
+          );
 
-            return newData;
-          });
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
 
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
+              return {
+                ...oldData,
+                members: conversation.members
+              };
+            }
+          );
+          break;
+        case 'remove_member':
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            return {
-              ...oldData,
-              members: conversation.members
-            };
-          });
+              const newData = [...oldData];
+
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
+
+              if (index !== -1) {
+                const isHavingMe = newData[index].members.some(
+                  item => item._id === currentUserID
+                );
+                const isHavingUser = conversation.members.some(
+                  item => item._id === currentUserID
+                );
+                if (isHavingMe && !isHavingUser) {
+                  if (window.location.pathname.includes(conversation._id))
+                    navigate('/message', { replace: true });
+                  newData.splice(index, 1);
+                } else {
+                  newData[index] = {
+                    ...newData[index],
+                    members: conversation.members
+                  };
+                }
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
+                members: conversation.members
+              };
+            }
+          );
           break;
         case 'commission_admin':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
+              if (index !== -1) {
+                newData[index] = {
+                  ...newData[index],
+                  admins: conversation.admins
+                };
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
                 admins: conversation.admins
               };
             }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              admins: conversation.admins
-            };
-          });
+          );
           break;
         case 'remove_admin':
-          queryClient.setQueryData<IConversation[]>(['conversations'], (oldData) => {
-            if (!oldData) return;
+          queryClient.setQueryData<IConversation[]>(
+            ['conversations'],
+            oldData => {
+              if (!oldData) return;
 
-            const newData = [...oldData];
+              const newData = [...oldData];
 
-            const index = newData.findIndex((item) => item._id === conversation._id);
+              const index = newData.findIndex(
+                item => item._id === conversation._id
+              );
 
-            if (index !== -1) {
-              newData[index] = {
-                ...newData[index],
+              if (index !== -1) {
+                newData[index] = {
+                  ...newData[index],
+                  admins: conversation.admins
+                };
+              }
+
+              return newData;
+            }
+          );
+
+          queryClient.setQueryData<IConversation>(
+            ['conversation', conversation._id],
+            oldData => {
+              if (!oldData) return;
+
+              return {
+                ...oldData,
                 admins: conversation.admins
               };
             }
-
-            return newData;
-          });
-
-          queryClient.setQueryData<IConversation>(['conversation', conversation._id], (oldData) => {
-            if (!oldData) return;
-
-            return {
-              ...oldData,
-              admins: conversation.admins
-            };
-          });
+          );
           break;
         default:
           break;

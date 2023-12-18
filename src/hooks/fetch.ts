@@ -1,4 +1,9 @@
-import { type InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query';
 
 import { IMessage } from '@/types';
 import { userService } from '@/services/UserService';
@@ -8,6 +13,7 @@ import { GITHUB_TOKEN } from '@/util/constants/SettingSystem';
 import { messageService } from '@/services/MessageService';
 import { useAppSelector } from './special';
 import { communityService } from '@/services/CommunityService';
+import { adminService } from '@/services/AdminService';
 
 // ---------------------------FETCH HOOKS---------------------------
 
@@ -22,23 +28,26 @@ import { communityService } from '@/services/CommunityService';
  * - `isFetchingCurrentUserInfo` is a boolean that indicates whether the query is currently fetching.
  */
 export const useCurrentUserInfo = () => {
-  const userID = useAppSelector((state) => state.auth.userID);
+  const userID = useAppSelector(state => state.auth.userID);
 
   const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ['currentUserInfo'],
     queryFn: async () => {
-      const [{ data: Followers }, { data: Following }, { data: userInfo }] = await Promise.all([
-        userService.getFollowers(userID),
-        userService.getFollowing(userID),
-        userService.getUserInfoByID(userID)
-      ]);
+      const [{ data: Followers }, { data: Following }, { data: userInfo }] =
+        await Promise.all([
+          userService.getFollowers(userID),
+          userService.getFollowing(userID),
+          userService.getUserInfoByID(userID)
+        ]);
 
       userInfo.metadata.followers = Followers.metadata;
       userInfo.metadata.following = Following.metadata;
       return ApplyDefaults(userInfo.metadata);
     },
     staleTime: Infinity,
-    enabled: window.location.pathname !== '/login' && window.location.pathname !== '/register'
+    enabled:
+      window.location.pathname !== '/login' &&
+      window.location.pathname !== '/register'
   });
 
   return {
@@ -64,16 +73,18 @@ export const useOtherUserInfo = (userID: string) => {
   const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ['otherUserInfo', userID],
     queryFn: async () => {
-      const [{ data: Followers }, { data: Following }, { data: userInfo }] = await Promise.all([
-        userService.getFollowers(userID),
-        userService.getFollowing(userID),
-        userService.getUserInfoByID(userID)
-      ]);
+      const [{ data: Followers }, { data: Following }, { data: userInfo }] =
+        await Promise.all([
+          userService.getFollowers(userID),
+          userService.getFollowing(userID),
+          userService.getUserInfoByID(userID)
+        ]);
 
       userInfo.metadata.followers = Followers.metadata;
       userInfo.metadata.following = Following.metadata;
       return ApplyDefaults(userInfo.metadata);
     },
+    enabled: !!userID,
     staleTime: Infinity
   });
 
@@ -125,30 +136,38 @@ export const useAllPostsData = () => {
  * - `refetchAllNewsfeedPosts` is a function that refetches the posts data.
  */
 export const useAllNewsfeedPostsData = () => {
-  const { data, isPending, isError, isFetching, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ['allNewsfeedPosts'],
-      queryFn: async ({ pageParam }) => {
-        const { data } = await postService.getAllPostNewsFeed(pageParam);
-        return ApplyDefaults(data.metadata);
-      },
-      initialPageParam: 1,
-      getNextPageParam: (lastPage, _, __, allPageParams) => {
-        if (lastPage.length < 5) {
-          return undefined;
-        }
-        return allPageParams.length + 1;
-      },
-      select: (data) => {
-        if (data.pages.length > 4) {
-          data.pages.shift();
-        }
+  const {
+    data,
+    isPending,
+    isError,
+    isFetching,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ['allNewsfeedPosts'],
+    queryFn: async ({ pageParam }) => {
+      const { data } = await postService.getAllPostNewsFeed(pageParam);
+      return ApplyDefaults(data.metadata);
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _, __, allPageParams) => {
+      if (lastPage.length < 5) {
+        return undefined;
+      }
+      return allPageParams.length + 1;
+    },
+    select: data => {
+      if (data.pages.length > 4) {
+        data.pages.shift();
+      }
 
-        return data.pages.flat();
-      },
-      staleTime: Infinity,
-      enabled: window.location.pathname === '/'
-    });
+      return data.pages.flat();
+    },
+    staleTime: Infinity,
+    enabled: window.location.pathname === '/'
+  });
 
   return {
     isLoadingAllNewsfeedPosts: isPending,
@@ -203,7 +222,14 @@ export const useAllPopularPostsData = (sort: string) => {
  * - `isFetchingUserPosts` is a boolean that indicates whether the query is currently fetching.
  */
 export const useUserPostsData = (userID: string) => {
-  const { data, isPending, isError, isFetchingNextPage, hasNextPage, fetchNextPage } = useInfiniteQuery({
+  const {
+    data,
+    isPending,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useInfiniteQuery({
     queryKey: ['posts', userID],
     queryFn: async ({ pageParam }) => {
       const { data } = await postService.getAllPostByUserID(userID, pageParam);
@@ -216,7 +242,7 @@ export const useUserPostsData = (userID: string) => {
       }
       return lastPageParam + 1;
     },
-    select: (data) => {
+    select: data => {
       return data.pages.flat();
     },
     staleTime: Infinity
@@ -290,6 +316,24 @@ export const useCommentsData = (postID: string) => {
   };
 };
 
+export const useGetCommentByPostForAdmin = (postID: string) => {
+  const { data, isPending, isError, isFetching } = useQuery({
+    queryKey: ['comments', postID],
+    queryFn: async () => {
+      const { data } = await adminService.getCommentByPostForAdmin(postID);
+      return data;
+    },
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingComments: isPending,
+    isErrorComments: isError,
+    comments: data?.metadata,
+    isFetchingComments: isFetching
+  };
+}
+
 /**
  * The `useGetRepository` function is a custom hook that retrieves repository data from GitHub API and
  * provides loading, error, and fetching status.
@@ -360,7 +404,9 @@ export const useConversationsData = () => {
  * - `currentConversation` is an object that contains information about the current conversation.
  * - `isFetchingCurrentConversation` is a boolean that indicates whether the query is currently fetching.
  */
-export const useCurrentConversationData = (conversationID: string | undefined) => {
+export const useCurrentConversationData = (
+  conversationID: string | undefined
+) => {
   const queryClient = useQueryClient();
 
   const { data, isPending, isError, isFetching } = useQuery({
@@ -446,7 +492,10 @@ export const useGetAllUsersUsedToChatWith = () => {
  */
 export const useMessages = (conversationID: string) => {
   const queryClient = useQueryClient();
-  const messages = queryClient.getQueryData<InfiniteData<IMessage[], number>>(['messages', conversationID]);
+  const messages = queryClient.getQueryData<InfiniteData<IMessage[], number>>([
+    'messages',
+    conversationID
+  ]);
   let extend = 0;
   if (messages) {
     if (messages.pages[messages.pages.length - 1].length >= 30) {
@@ -454,31 +503,42 @@ export const useMessages = (conversationID: string) => {
     }
   }
 
-  const { data, isPending, isError, isFetching, hasPreviousPage, fetchPreviousPage, isFetchingPreviousPage } =
-    useInfiniteQuery({
-      queryKey: ['messages', conversationID],
-      queryFn: async ({ pageParam }) => {
-        const { data } = await messageService.getMessages(conversationID, pageParam, extend);
-        return data.metadata;
-      },
-      initialPageParam: 1,
-      getPreviousPageParam: (lastPage, _, lastPageParam) => {
-        if (lastPage.length < 30) {
-          return undefined;
-        }
-        return lastPageParam + 1;
-      },
-      getNextPageParam: (_, __, firstPageParam) => {
-        if (firstPageParam <= 1) {
-          return undefined;
-        }
-        return firstPageParam - 1;
-      },
-      select: (data) => {
-        return data.pages.flat();
-      },
-      staleTime: Infinity
-    });
+  const {
+    data,
+    isPending,
+    isError,
+    isFetching,
+    hasPreviousPage,
+    fetchPreviousPage,
+    isFetchingPreviousPage
+  } = useInfiniteQuery({
+    queryKey: ['messages', conversationID],
+    queryFn: async ({ pageParam }) => {
+      const { data } = await messageService.getMessages(
+        conversationID,
+        pageParam,
+        extend
+      );
+      return data.metadata;
+    },
+    initialPageParam: 1,
+    getPreviousPageParam: (lastPage, _, lastPageParam) => {
+      if (lastPage.length < 30) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    getNextPageParam: (_, __, firstPageParam) => {
+      if (firstPageParam <= 1) {
+        return undefined;
+      }
+      return firstPageParam - 1;
+    },
+    select: data => {
+      return data.pages.flat();
+    },
+    staleTime: Infinity
+  });
 
   return {
     isLoadingMessages: isPending,
@@ -504,31 +564,42 @@ export const useMessagesImage = (conversationID: string) => {
     }
   }
 
-  const { data, isPending, isError, isFetching, hasPreviousPage, fetchPreviousPage, isFetchingPreviousPage } =
-    useInfiniteQuery({
-      queryKey: ['messagesImage', conversationID],
-      queryFn: async ({ pageParam }) => {
-        const { data } = await messageService.getMessagesWithImage(conversationID, pageParam, extend);
-        return data.metadata;
-      },
-      initialPageParam: 1,
-      getPreviousPageParam: (lastPage, _, lastPageParam) => {
-        if (lastPage.length < 30) {
-          return undefined;
-        }
-        return lastPageParam + 1;
-      },
-      getNextPageParam: (_, __, firstPageParam) => {
-        if (firstPageParam <= 1) {
-          return undefined;
-        }
-        return firstPageParam - 1;
-      },
-      select: (data) => {
-        return data.pages.flat();
-      },
-      staleTime: Infinity
-    });
+  const {
+    data,
+    isPending,
+    isError,
+    isFetching,
+    hasPreviousPage,
+    fetchPreviousPage,
+    isFetchingPreviousPage
+  } = useInfiniteQuery({
+    queryKey: ['messagesImage', conversationID],
+    queryFn: async ({ pageParam }) => {
+      const { data } = await messageService.getMessagesWithImage(
+        conversationID,
+        pageParam,
+        extend
+      );
+      return data.metadata;
+    },
+    initialPageParam: 1,
+    getPreviousPageParam: (lastPage, _, lastPageParam) => {
+      if (lastPage.length < 30) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    getNextPageParam: (_, __, firstPageParam) => {
+      if (firstPageParam <= 1) {
+        return undefined;
+      }
+      return firstPageParam - 1;
+    },
+    select: data => {
+      return data.pages.flat();
+    },
+    staleTime: Infinity
+  });
 
   return {
     isLoadingMessagesImage: isPending,
@@ -556,7 +627,10 @@ export const useMessagesImage = (conversationID: string) => {
  * - `isFetchingMessageCall` is a boolean that indicates whether the query is currently fetching.
  * - `fetchMessageCall` is a function that refetches the message call data.
  */
-export const useMessageCall = (conversationID: string | undefined, type: string) => {
+export const useMessageCall = (
+  conversationID: string | undefined,
+  type: string
+) => {
   const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: ['messageCall', conversationID, type],
     queryFn: async () => {
@@ -621,3 +695,60 @@ export const useGetCommunityByID = (id: string) => {
     isFetchingMessageCall: isFetching
   };
 };
+
+export const useCheckExistEmail = (email: string) => {
+  const { data, isPending, isError, isFetching } = useQuery({
+    queryKey: ['checkEmail', email],
+    queryFn: async () => {
+      const { data } = await userService.checkExistEmail(email);
+      return data.metadata;
+    },
+    staleTime: Infinity,
+    enabled: !!email
+  });
+
+  return {
+    isLoadingCheckEmail: isPending,
+    isErrorMessageCall: isError,
+    checkEmail: data!,
+    isFetchingMessageCall: isFetching
+  };
+}
+
+export const useGetUserForAdmin = () => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['userForAdmin'],
+    queryFn: async () => {
+      const { data } = await adminService.getUserForAdmin();
+      return data.metadata;
+    },
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingUserForAdmin: isPending,
+    isErrorMessageCall: isError,
+    refetchUserForAdmin: refetch,
+    userListForAdmin: data!,
+    isFetchingMessageCall: isFetching
+  };
+};
+
+export const useGetPostForAdmin = () => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['postForAdmin'],
+    queryFn: async () => {
+      const { data } = await adminService.getPostForAdmin();
+      return data.metadata;
+    },
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingPostForAdmin: isPending,
+    isErrorMessageCall: isError,
+    refetchPostForAdmin: refetch,
+    postListForAdmin: data!,
+    isFetchingMessageCall: isFetching
+  };
+}
