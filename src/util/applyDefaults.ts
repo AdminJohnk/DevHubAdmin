@@ -1,6 +1,6 @@
 import { IPost, IUserInfo } from '@/types';
 
-const ApplyDefaults = <T extends IUserInfo | IPost | IPost[]>(obj: T): T => {
+const ApplyDefaults = <T extends IUserInfo | IPost | IPost[]>(obj: T): T => { 
   const defaultValues: IUserInfo | IPost = {
     _id: '',
     id_incr: 0,
