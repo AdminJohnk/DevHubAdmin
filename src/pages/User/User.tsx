@@ -16,8 +16,8 @@ import {
 import { openDrawer } from '@/redux/Slice/DrawerHOCSlice';
 import EditProfileForm from '@/components/Form/EditProfileForm';
 import DeleteModal from '@/components/DeleteUserModal';
+import FormRegister from '@/components/Form/FormRegister/FormRegister';
 import { openModal } from '@/redux/Slice/ModalHOCSlice';
-import FormRegister from '../../components/Form/FormRegister/FormRegister';
 
 const columns: ColumnsType<DataType> = [
   {

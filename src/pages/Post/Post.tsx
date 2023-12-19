@@ -12,6 +12,7 @@ import {
   faPenToSquare,
   faArrowsRotate,
   faPlus,
+  faComment
 } from '@fortawesome/free-solid-svg-icons';
 import { openDrawer } from '@/redux/Slice/DrawerHOCSlice';
 import DeleteModal from '@/components/PostProperties/DeletePostModal';

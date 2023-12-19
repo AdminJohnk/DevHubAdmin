@@ -101,6 +101,7 @@ export interface IUserInfo {
   members: IUserInfo[];
   post_number: number;
   is_friend: boolean;
+  id_incr: number;
 }
 
 export interface TypeOfLink {
