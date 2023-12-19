@@ -9,7 +9,7 @@ import Post from './pages/Post';
 
 export const privateRoutes = [
   {
-    path: '/dashboard',
+    path: '/',
     element: <MainLayout Component={<DashBoard />} />
   },
   {
