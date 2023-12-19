@@ -23,7 +23,6 @@ import {
   MailOutlined,
   PoweroffOutlined
 } from '@ant-design/icons';
-import { useMediaQuery } from 'react-responsive';
 
 import { setTheme } from '@/redux/Slice/ThemeSlice';
 import { LOGOUT_SAGA } from '@/redux/ActionSaga/AuthActionSaga';

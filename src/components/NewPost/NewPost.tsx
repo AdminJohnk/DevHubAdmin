@@ -17,8 +17,6 @@ import Picker from '@emoji-mart/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { UploadOutlined } from '@ant-design/icons';
 import { faFaceSmile } from '@fortawesome/free-solid-svg-icons';
-import { useMediaQuery } from 'react-responsive';
-
 import { ButtonActiveHover } from '@/components/MiniComponent';
 import { commonColor } from '@/util/cssVariable';
 import { getTheme } from '@/util/theme';

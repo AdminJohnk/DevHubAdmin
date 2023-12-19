@@ -6,7 +6,7 @@ import {
   ButtonActiveHover,
   ButtonCancelHover
 } from '@/components/MiniComponent';
-import { useDeletePost, useDeletePostForAdmin } from '@/hooks/mutation';
+import { useDeletePostForAdmin } from '@/hooks/mutation';
 import { commonColor } from '@/util/cssVariable';
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';

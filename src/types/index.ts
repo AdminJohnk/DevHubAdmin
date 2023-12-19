@@ -160,6 +160,9 @@ export interface IPost {
     comment_number: number;
     share_number: number;
     save_number: number;
+    likes: ILikePost[];
+    comments: ICommentPost[];
+    shares: ISharePost[];
   };
   is_liked: boolean;
   is_shared: boolean;

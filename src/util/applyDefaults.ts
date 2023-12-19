@@ -75,7 +75,8 @@ const ApplyDefaults = <T extends IUserInfo | IPost | IPost[]>(obj: T): T => {
       view_number: 0,
       like_number: 0,
       comment_number: 0,
-      share_number: 0
+      share_number: 0,
+      save_number: 0,
     },
     is_liked: false,
     is_shared: false,
