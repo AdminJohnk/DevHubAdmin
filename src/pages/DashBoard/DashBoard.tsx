@@ -1,5 +1,3 @@
-import { NavLink } from 'react-router-dom';
-
 import { getTheme } from '@/util/theme';
 import { useAppSelector } from '@/hooks/special';
 import StyleProvider from './cssDashBoard';
@@ -8,9 +6,6 @@ const DashBoard = () => {
   // Lấy theme từ LocalStorage chuyển qua css
   useAppSelector((state) => state.theme.changed);
   const { themeColorSet } = getTheme();
-
-  document.title = 'Not Found!';
-
   return (
     <StyleProvider theme={themeColorSet}>
       <div className='dashBoardWrap'>
