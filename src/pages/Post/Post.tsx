@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ConfigProvider, Skeleton, Table, Tooltip } from 'antd';
+import { ConfigProvider, Table } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { v4 as uuidv4 } from 'uuid';
 import { getTheme } from '@/util/theme';
@@ -12,7 +12,6 @@ import {
   faPenToSquare,
   faArrowsRotate,
   faPlus,
-  faComment
 } from '@fortawesome/free-solid-svg-icons';
 import { openDrawer } from '@/redux/Slice/DrawerHOCSlice';
 import DeleteModal from '@/components/PostProperties/DeletePostModal';

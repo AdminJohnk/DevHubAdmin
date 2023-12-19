@@ -14,43 +14,6 @@ const DashBoard = () => {
     {
       title: 'Name',
       dataIndex: 'name',
-      filters: [
-        {
-          text: 'Joe',
-          value: 'Joe'
-        },
-        {
-          text: 'Category 1',
-          value: 'Category 1',
-          children: [
-            {
-              text: 'Yellow',
-              value: 'Yellow'
-            },
-            {
-              text: 'Pink',
-              value: 'Pink'
-            }
-          ]
-        },
-        {
-          text: 'Category 2',
-          value: 'Category 2',
-          children: [
-            {
-              text: 'Green',
-              value: 'Green'
-            },
-            {
-              text: 'Black',
-              value: 'Black'
-            }
-          ]
-        }
-      ],
-      filterMode: 'tree',
-      filterSearch: true,
-      onFilter: (value: string, record) => record.name.includes(value),
       width: '30%'
     },
     {
@@ -61,18 +24,6 @@ const DashBoard = () => {
     {
       title: 'Address',
       dataIndex: 'address',
-      filters: [
-        {
-          text: 'London',
-          value: 'London'
-        },
-        {
-          text: 'New York',
-          value: 'New York'
-        }
-      ],
-      onFilter: (value: string, record) => record.address.startsWith(value),
-      filterSearch: true,
       width: '40%'
     }
   ];

@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Button,
   ConfigProvider,
   Input,
@@ -23,13 +22,12 @@ import { useMediaQuery } from 'react-responsive';
 import { ButtonActiveHover } from '@/components/MiniComponent';
 import { commonColor } from '@/util/cssVariable';
 import { getTheme } from '@/util/theme';
-import getImageURL from '@/util/getImageURL';
 import {closeModal} from '@/redux/Slice/ModalHOCSlice';
 import { textToHTML } from '@/util/convertText';
 import { toolbarOptions } from '@/util/constants/SettingSystem';
-import { createPostForAdmin, useCreatePost } from '@/hooks/mutation';
+import { createPostForAdmin } from '@/hooks/mutation';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';
-import { IEmoji, IUserInfo, Visibility } from '@/types';
+import { IEmoji, Visibility } from '@/types';
 import { imageService } from '@/services/ImageService';
 import StyleProvider from './cssNewPost';
 import { useCheckExistEmail } from '@/hooks/fetch';
@@ -61,8 +59,6 @@ const NewPost = () => {
   const { checkEmail, isLoadingCheckEmail } = useCheckExistEmail(emailCheck);
 
   const ReactQuillRef = useRef<ReactQuill | null>(null);
-
-  const isXsScreen = useMediaQuery({ maxWidth: 639 });
 
   useEffect(() => {
     const quill = ReactQuillRef.current?.getEditor()!;

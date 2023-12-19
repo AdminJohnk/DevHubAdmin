@@ -1,15 +1,10 @@
 import {
-  faMessage,
-  faImage,
   faHouse,
-  faPeopleRoof,
-  faPeopleGroup,
   faUser,
-  faNewspaper,
-  faComments
+  faNewspaper
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Menu, Layout, Row, Col, Avatar } from 'antd';
+import { Menu, Layout, Avatar } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from 'react-responsive';
@@ -31,22 +26,6 @@ const MenuMain = () => {
   const { currentUserInfo } = useCurrentUserInfo();
   const [key, setKey] = useState('');
 
-  // Hover menu
-  const [collapsed, setCollapsed] = useState(true);
-  const handleMouseEnter = () => {
-    setCollapsed(false);
-    if (isXsScreen) {
-      setShowMenu(true);
-    }
-  };
-  const handleMouseLeave = () => {
-    if (isXsScreen) {
-      setShowMenu(false);
-      return;
-    }
-    setCollapsed(true);
-  };
-
   useEffect(() => {
     const path = location.pathname;
     const pathMap: Record<string, string> = {
@@ -58,17 +37,12 @@ const MenuMain = () => {
   }, [location.pathname]);
 
   const [showMenu, setShowMenu] = useState(false);
-  const handleShowMenu = () => {
-    setShowMenu(!showMenu);
-  };
   const isXsScreen = useMediaQuery({ maxWidth: 639 });
   useEffect(() => {
     if (isXsScreen) {
       setShowMenu(false);
-      setCollapsed(false);
     } else {
       setShowMenu(true);
-      setCollapsed(true);
     }
   }, [isXsScreen]);
 

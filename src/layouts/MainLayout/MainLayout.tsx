@@ -1,4 +1,4 @@
-import { Affix, ConfigProvider, FloatButton, Layout } from 'antd';
+import { ConfigProvider, FloatButton, Layout } from 'antd';
 
 import Headers from '@/components/Headers';
 import LoadingLogo from '@/components/Loading/LoadingLogo';

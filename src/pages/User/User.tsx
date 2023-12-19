@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ConfigProvider, Skeleton, Table } from 'antd';
+import { ConfigProvider, Table } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { v4 as uuidv4 } from 'uuid';
 import { getTheme } from '@/util/theme';
@@ -18,8 +18,6 @@ import EditProfileForm from '@/components/Form/EditProfileForm';
 import DeleteModal from '@/components/DeleteUserModal';
 import { openModal } from '@/redux/Slice/ModalHOCSlice';
 import FormRegister from '../../components/Form/FormRegister/FormRegister';
-import { TablePaginationConfig } from 'antd/lib';
-import { FilterValue } from 'antd/es/table/interface';
 
 const columns: ColumnsType<DataType> = [
   {

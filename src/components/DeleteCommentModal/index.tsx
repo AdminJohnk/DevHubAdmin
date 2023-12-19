@@ -7,8 +7,6 @@ import {
   ButtonCancelHover
 } from '@/components/MiniComponent';
 import {
-  useDeletePost,
-  useDeleteUserForAdmin,
   userDeleteCommentForAdmin
 } from '@/hooks/mutation';
 import { commonColor } from '@/util/cssVariable';

@@ -13,7 +13,7 @@ import { getTheme } from '@/util/theme';
 import getImageURL from '@/util/getImageURL';
 import { capitalizeFirstLetter, textToHTML } from '@/util/convertText';
 import { toolbarOptions } from '@/util/constants/SettingSystem';
-import { useUpdatePost, useUpdatePostForAdmin } from '@/hooks/mutation';
+import { useUpdatePostForAdmin } from '@/hooks/mutation';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';
 import { imageService } from '@/services/ImageService';
 import { IEmoji, Visibility } from '@/types';

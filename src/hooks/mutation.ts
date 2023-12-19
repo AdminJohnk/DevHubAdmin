@@ -23,7 +23,6 @@ import {
   ISocketCall,
   IUpdateConversation,
   IUpdatePost,
-  IUserInfo,
   IUserRegister,
   IUserUpdate
 } from '@/types';

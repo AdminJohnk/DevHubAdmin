@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { UserOutlined, MailOutlined } from '@ant-design/icons';
 import { App, Form, Input  } from 'antd';
 import { useForm } from 'react-hook-form';
-import { REGISTER_SAGA } from '@/redux/ActionSaga/AuthActionSaga';
 import { setLoading } from '@/redux/Slice/AuthSlice';
 import { IUserRegister } from '@/types';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';

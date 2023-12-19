@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { flex_center_column, commonColor } from '@/util/cssVariable';
 
 const StyleProvider = styled.div`
   input:-webkit-autofill,

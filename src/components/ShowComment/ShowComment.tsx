@@ -1,6 +1,6 @@
-import { useAppDispatch, useAppSelector } from '@/hooks/special';
+import { useAppSelector } from '@/hooks/special';
 import { getTheme } from '@/util/theme';
-import type { ColumnsType, TableProps } from 'antd/es/table';
+import type { ColumnsType } from 'antd/es/table';
 import StyleProvider from './cssShowComment';
 import { useMemo, useState } from 'react';
 import {
@@ -9,7 +9,6 @@ import {
 } from '@/hooks/fetch';
 import {
   ConfigProvider,
-  Form,
   Input,
   Skeleton,
   Table,
@@ -28,7 +27,6 @@ import DeleteModal from '@/components/DeleteCommentModal';
 import { getDateTimeToNow } from '@/util/formatDateTime';
 import { useForm } from 'react-hook-form';
 import {
-  userDeleteCommentForAdmin,
   useupdateCommentForAdmin
 } from '@/hooks/mutation';
 import { ICommentUpdate } from '@/types';

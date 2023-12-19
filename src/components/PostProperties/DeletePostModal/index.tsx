@@ -2,7 +2,10 @@ import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Modal, notification } from 'antd';
 
-import { ButtonActiveHover, ButtonCancelHover } from '@/components/MiniComponent';
+import {
+  ButtonActiveHover,
+  ButtonCancelHover
+} from '@/components/MiniComponent';
 import { useDeletePost, useDeletePostForAdmin } from '@/hooks/mutation';
 import { commonColor } from '@/util/cssVariable';
 
@@ -15,8 +18,13 @@ interface IDeleteModalProps {
   image?: string[];
 }
 
-const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpen }) => {
-  const { isLoadingDeletePostForAdmin, mutateDeletePostForAdmin } = useDeletePostForAdmin();
+const DeletePostModal: React.FC<IDeleteModalProps> = ({
+  postID,
+  isOpen,
+  setIsOpen
+}) => {
+  const { isLoadingDeletePostForAdmin, mutateDeletePostForAdmin } =
+    useDeletePostForAdmin();
 
   const handleOk = () => {
     mutateDeletePostForAdmin(postID);
@@ -68,8 +76,7 @@ const DeletePostModal: React.FC<IDeleteModalProps> = ({ postID, isOpen, setIsOpe
               loading={isLoadingDeletePostForAdmin}
               onClick={() => {
                 handleOk();
-              }}
-              >
+              }}>
               Delete
             </ButtonActiveHover>
           </div>

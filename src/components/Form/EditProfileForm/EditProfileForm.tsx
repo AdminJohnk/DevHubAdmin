@@ -40,7 +40,6 @@ import { useOtherUserInfo } from '@/hooks/fetch';
 import { IContact, IExperience } from '@/types';
 import { imageService } from '@/services/ImageService';
 import StyleProvider from './cssEditProfileForm';
-import { set } from 'lodash';
 import LoadingSpin from '@/components/Loading/LoadingSpin';
 
 interface IEditProfileFormProps {

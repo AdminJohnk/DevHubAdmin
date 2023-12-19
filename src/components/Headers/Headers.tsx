@@ -19,7 +19,6 @@ import { faSnowflake } from '@fortawesome/free-solid-svg-icons';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   BellOutlined,
-  UserOutlined,
   SearchOutlined,
   MailOutlined,
   PoweroffOutlined
@@ -121,8 +120,6 @@ const Headers = () => {
       )
     }
   ];
-
-  const isXsScreen = useMediaQuery({ maxWidth: 639 });
 
   // const popupNotification = (message: any, conversation: any) => {
   //   api.open({
