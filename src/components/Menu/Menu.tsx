@@ -29,7 +29,7 @@ const MenuMain = () => {
   useEffect(() => {
     const path = location.pathname;
     const pathMap: Record<string, string> = {
-      '/dashboard': '1',
+      '/': '1',
       '/admin/users': '2',
       '/admin/posts': '3'
     };
@@ -101,7 +101,11 @@ const MenuMain = () => {
               key: '1',
               icon: <FontAwesomeIcon className='icon' icon={faHouse} />,
               label: 'Dashboard',
-              title: ''
+              title: '',
+              onClick: () => {
+                navigate('/');
+                if (isXsScreen) setShowMenu(false);
+              }
             },
             {
               key: '2',
