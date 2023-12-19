@@ -3,7 +3,7 @@ import Register from '@/pages/Register';
 import NotFound404 from '@/pages/NotFound404';
 import DashBoard from '@/pages/DashBoard';
 import User from '@/pages/User';
-
+import Login from '@/pages/Login';
 import MainLayout from '@/layouts/MainLayout';
 import Post from './pages/Post';
 
@@ -27,10 +27,10 @@ export const privateRoutes = [
 ];
 
 export const publicRoutes = [
-  // {
-  //   path: '/login',
-  //   element: <Login />
-  // },
+  {
+    path: '/login',
+    element: <Login />
+  },
   {
     path: '/register',
     element: <Register />

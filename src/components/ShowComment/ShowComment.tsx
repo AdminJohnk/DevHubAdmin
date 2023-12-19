@@ -81,6 +81,7 @@ const ShowComment: React.FC<IShowCommentProps> = ({ postID, typeCMT }) => {
   const { themeColorSet, themeColor } = getTheme();
 
   const [commentID, setCommentID] = useState<string>('');
+  const [userID, setUserID] = useState<string>('');
   const [commentIDShow, setcommentIDShow] = useState<string>('');
   const [typecmt, setTypecmt] = useState<string>(typeCMT);
 
@@ -177,6 +178,7 @@ const ShowComment: React.FC<IShowCommentProps> = ({ postID, typeCMT }) => {
                   className='btn-function btn-delete'
                   onClick={() => { 
                     setCommentID(comment._id);
+                    setUserID(comment.user._id);
                     showModal();
                   }}>
                   <FontAwesomeIcon size='1x' icon={faTrash} />
@@ -235,6 +237,8 @@ const ShowComment: React.FC<IShowCommentProps> = ({ postID, typeCMT }) => {
             isOpen={isModalOpen}
             setIsOpen={setIsModalOpen}
             commentID={commentID}
+            postID={postID}
+            userID={userID}
             typecmt={typecmt}
           />
           <div className='admin-user flex justify-center'>

@@ -52,7 +52,10 @@ class AdminService extends BaseService {
   //   > => {
   //     return this.getGithub(`/users/repositories`);
   //   };
-  getUserForAdmin = (page: number, pagesize: number): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
+  getUserForAdmin = (
+    page: number,
+    pagesize: number
+  ): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
     return this.get(`/admin/users/${page}/${pagesize}`);
   };
   updateUserForAdmin = (
@@ -71,7 +74,10 @@ class AdminService extends BaseService {
   ): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
     return this.post(`/admin/users/create`, userRegister);
   };
-  getPostForAdmin = (page: number, pageSize: number): Promise<AxiosResponse<IResponse<IPost[]>>> => {
+  getPostForAdmin = (
+    page: number,
+    pageSize: number
+  ): Promise<AxiosResponse<IResponse<IPost[]>>> => {
     return this.get(`/admin/posts/${page}/${pageSize}`);
   };
   updatePostForAdmin = (
@@ -108,9 +114,11 @@ class AdminService extends BaseService {
   };
   deleteCommentForAdmin = (
     id: string,
+    post: string,
+    user: string,
     type: string
   ): Promise<AxiosResponse<IResponse<ICommentPost>>> => {
-    return this.delete(`/admin/comments/delete/${id}`, { type });
+    return this.delete(`/admin/comments/delete/${id}`, { type, post, user });
   };
   getUserNumberForAdmin = (): Promise<AxiosResponse<IResponse<number>>> => {
     return this.get(`/admin/users/number`);

@@ -9,10 +9,8 @@ export const NotAuth = () => {
   const location = useLocation();
   const userID = useAppSelector(state => state.auth.userID);
 
-  console.log('userID', userID);
-
   if (userID !== NO_USER_ID) {
-    return <Navigate to='/' replace state={{ from: location }} />;
+    return <Navigate to='/admin/users' replace state={{ from: location }} />;
   }
 
   localStorage.removeItem(AUTHORIZATION);

@@ -18,12 +18,16 @@ type NotificationType = 'success' | 'info' | 'warning' | 'error';
 interface IDeleteModalProps {
   isOpen: boolean;
   commentID: string;
+  postID: string;
+  userID: string;
   typecmt: string;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DeleteCommentModal: React.FC<IDeleteModalProps> = ({
   commentID,
+  postID,
+  userID,
   typecmt,
   isOpen,
   setIsOpen
@@ -35,6 +39,8 @@ const DeleteCommentModal: React.FC<IDeleteModalProps> = ({
     mutateDeleteCommentForAdmin(
       {
         commentID,
+        postID,
+        userID,
         type: typecmt
       },
       {

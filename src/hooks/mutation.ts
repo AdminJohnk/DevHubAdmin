@@ -510,12 +510,16 @@ export const userDeleteCommentForAdmin = () => {
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async ({
       commentID,
+      postID,
+      userID,
       type
     }: {
       commentID: string;
+      postID: string;
+      userID: string;
       type: string;
     }) => {
-      await adminService.deleteCommentForAdmin(commentID, type);
+      await adminService.deleteCommentForAdmin(commentID, postID, userID, type);
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['parentcomments'] });
