@@ -13,9 +13,7 @@ const DashBoard = () => {
           <div className='dashBoard'>
             <div className='dashBoard-content'>
               <h1>Dashboard Admin</h1>
-              {/* <h2>Dashboard Admin</h2> */}
             </div>
-            {/* <NavLink to='/'>Homepage</NavLink> */}
           </div>
         </div>
       </div>

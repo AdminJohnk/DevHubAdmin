@@ -54,21 +54,6 @@ const StyleProvider = styled.div`
       text-shadow: -1px -1px 0px #8400ff, 1px 1px 0px #ff005a;
       letter-spacing: -20px;
     }
-
-    .dashBoard .dashBoard-content h2 {
-      font-family: 'Montserrat', sans-serif;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 110px;
-      font-size: 42px;
-      font-weight: 700;
-      color: ${props => props.theme.colorText1};
-      text-transform: uppercase;
-      text-shadow: 0px 2px 0px #8400ff;
-      letter-spacing: 13px;
-      margin: 0;
-    }
   }
 `;
 
