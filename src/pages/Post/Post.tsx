@@ -57,7 +57,7 @@ const columns: ColumnsType<DataType> = [
 interface DataType {
   key: React.Key;
   title: string;
-  content: string;
+  content: React.ReactNode;
   owner: string;
   visibility: string;
   interaction: string;
