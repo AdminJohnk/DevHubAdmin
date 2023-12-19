@@ -1,13 +1,5 @@
-import { CommunityWrapper, PostWrapper, ProfileWrapper } from '@/Wrapper';
-
-import Login from '@/pages/GetStarted/Login';
+// import Login from '@/pages/GetStarted/Login';
 import Register from '@/pages/Register';
-import { ForgotPassword, ResetPassword, VerifyCode } from '@/pages/ForgotPassword';
-import NewsFeed from '@/pages/NewsFeed/NewsFeed';
-import Chat from '@/pages/Chat';
-import SelectInterest from '@/pages/SelectInterest';
-import SelectCommunity from '@/pages/SelectCommunity';
-import GetStarted from '@/pages/GetStarted';
 import NotFound404 from '@/pages/NotFound404';
 import DashBoard from '@/pages/DashBoard';
 import User from '@/pages/User';
@@ -31,42 +23,6 @@ export const privateRoutes = [
     element: <MainLayout Component={<Post />} />
   },
   {
-    path: '/',
-    element: <MainLayout Component={<NewsFeed />} />
-  },
-  {
-    path: '/message/:conversationID?',
-    element: <Chat />
-  },
-  {
-    path: '/select-interest',
-    element: <SelectInterest />
-  },
-  {
-    path: '/select-community',
-    element: <SelectCommunity />
-  },
-  {
-    path: '/get-started',
-    element: <GetStarted />
-  },
-  {
-    path: '/user/:userID',
-    element: <MainLayout Component={<ProfileWrapper />} />
-  },
-  {
-    path: '/me',
-    element: <MainLayout Component={<ProfileWrapper />} />
-  },
-  {
-    path: '/post/:postID',
-    element: <MainLayout Component={<PostWrapper />} />
-  },
-  {
-    path: '/community/:communityID',
-    element: <MainLayout Component={<CommunityWrapper />} />
-  },
-  {
     path: '/call/:conversationID?/voice',
     element: <VoiceCall />
   },
@@ -81,25 +37,13 @@ export const privateRoutes = [
 ];
 
 export const publicRoutes = [
-  {
-    path: '/login',
-    element: <Login />
-  },
+  // {
+  //   path: '/login',
+  //   element: <Login />
+  // },
   {
     path: '/register',
     element: <Register />
-  },
-  {
-    path: '/forgot',
-    element: <ForgotPassword />
-  },
-  {
-    path: '/verify',
-    element: <VerifyCode />
-  },
-  {
-    path: '/reset',
-    element: <ResetPassword />
   },
   {
     path: '*',
