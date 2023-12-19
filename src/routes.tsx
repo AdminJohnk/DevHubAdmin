@@ -4,8 +4,6 @@ import NotFound404 from '@/pages/NotFound404';
 import DashBoard from '@/pages/DashBoard';
 import User from '@/pages/User';
 
-import { VoiceCall, VideoCall } from '@/components/ChatComponents/MessageCall';
-
 import MainLayout from '@/layouts/MainLayout';
 import Post from './pages/Post';
 
@@ -21,14 +19,6 @@ export const privateRoutes = [
   {
     path: '/admin/posts',
     element: <MainLayout Component={<Post />} />
-  },
-  {
-    path: '/call/:conversationID?/voice',
-    element: <VoiceCall />
-  },
-  {
-    path: '/call/:conversationID?/video',
-    element: <VideoCall />
   },
   {
     path: '*',
