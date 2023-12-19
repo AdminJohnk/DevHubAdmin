@@ -7,12 +7,11 @@ import {
 
 import { closeDrawer, setLoading } from '@/redux/Slice/DrawerHOCSlice';
 import { closeModal } from '@/redux/Slice/ModalHOCSlice';
-import {
-  setLoading as setLoadingAuth,
-} from '@/redux/Slice/AuthSlice';
+import { setLoading as setLoadingAuth } from '@/redux/Slice/AuthSlice';
 import { postService } from '@/services/PostService';
 import { userService } from '@/services/UserService';
 import {
+  ICommentUpdate,
   IConversation,
   ICreateComment,
   ICreateLikeComment,
@@ -109,7 +108,7 @@ export const createPostForAdmin = () => {
     errorCreatePostForAdmin: error,
     isSuccessCreatePostForAdmin: isSuccess
   };
-}
+};
 
 /**
  * The `useViewPost` function is a custom hook that handles the logic for viewing a post, including
@@ -177,7 +176,10 @@ export const useUpdatePostForAdmin = () => {
     // },
     mutationFn: async (post: IUpdatePost) => {
       console.log(post);
-      const { data } = await adminService.updatePostForAdmin(post.id, post.postUpdate);
+      const { data } = await adminService.updatePostForAdmin(
+        post.id,
+        post.postUpdate
+      );
       return data.metadata;
     },
     onSuccess(updatedPost) {
@@ -201,7 +203,7 @@ export const useUpdatePostForAdmin = () => {
     isErrorUpdatePostForAdmin: isError,
     isSuccessUpdatePostForAdmin: isSuccess
   };
-}
+};
 
 /**
  * The `useDeletePost` function is a custom hook that handles the deletion of a post and invalidates
@@ -247,7 +249,7 @@ export const useDeletePostForAdmin = () => {
     isErrorDeletePostForAdmin: isError,
     isSuccessDeletePostForAdmin: isSuccess
   };
-}
+};
 
 export const useDeleteUserForAdmin = () => {
   const queryClient = useQueryClient();
@@ -472,6 +474,61 @@ export const useDislikeComment = () => {
   };
 };
 
+export const useupdateCommentForAdmin = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async ({
+      commentID,
+      comment
+    }: {
+      commentID: string;
+      comment: ICommentUpdate;
+    }) => {
+      const { data } = await adminService.updateCommentForAdmin(
+        commentID,
+        comment
+      );
+      return data.metadata;
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['parentcomments'] });
+      queryClient.invalidateQueries({ queryKey: ['childcomments'] });
+    }
+  });
+  return {
+    mutateupdateCommentForAdmin: mutate,
+    isLoadingupdateCommentForAdmin: isPending,
+    isErrorupdateCommentForAdmin: isError,
+    isSuccessupdateCommentForAdmin: isSuccess
+  };
+};
+
+export const userDeleteCommentForAdmin = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async ({
+      commentID,
+      type
+    }: {
+      commentID: string;
+      type: string;
+    }) => {
+      await adminService.deleteCommentForAdmin(commentID, type);
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['parentcomments'] });
+      queryClient.invalidateQueries({ queryKey: ['childcomments'] });
+    }
+  });
+  return {
+    mutateDeleteCommentForAdmin: mutate,
+    isLoadingDeleteCommentForAdmin: isPending,
+    isErrorDeleteCommentForAdmin: isError,
+    isSuccessDeleteCommentForAdmin: isSuccess
+  };
+};
 /**
  * The `useUpdateUser` function is a custom hook that handles updating a user's information and
  * invalidating the 'currentUserInfo' query in the query cache upon success.
@@ -508,44 +565,50 @@ export const useUpdateUser = (userID: string) => {
  * The `useFollowUser` function is a custom hook that handles following a user, including making the
  * API call, handling loading and error states, and invalidating relevant queries in the query cache.
  */
-export const useFollowUser = () => {
+export const useAddFriendUser = () => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: async (userID: string) => {
-      await userService.followUser(userID);
+      await userService.sendFriendRequest(userID);
     },
     onSuccess(_, userID) {
-      queryClient.setQueryData<IUserInfo>(['currentUserInfo'], oldData => {
-        if (!oldData) return;
+      queryClient.invalidateQueries({ queryKey: ['currentUserInfo'] });
 
-        const index = oldData.following.findIndex(item => item._id === userID);
-        return {
-          ...oldData,
-          following_number: oldData.following_number + (index !== -1 ? -1 : 1)
-        };
-      });
-
-      queryClient.setQueryData<IUserInfo>(
-        ['otherUserInfo', userID],
-        oldData => {
-          if (!oldData) return;
-
-          return {
-            ...oldData,
-            follower_number:
-              oldData.follower_number + (oldData.is_followed ? -1 : 1),
-            is_followed: !oldData.is_followed
-          };
-        }
-      );
+      queryClient.invalidateQueries({ queryKey: ['otherUserInfo', userID] });
     }
   });
   return {
-    mutateFollowUser: mutate,
-    isLoadingFollowUser: isPending,
-    isErrorFollowUser: isError,
-    isSuccessFollowUser: isSuccess
+    mutateAddFriendUser: mutate,
+    isLoadingAddFriendUser: isPending,
+    isErrorAddFriendUser: isError,
+    isSuccessAddFriendUser: isSuccess
+  };
+};
+
+/**
+ * The `useAcceptFriendUser` function is a custom hook that handles accepting a friend request,
+ * including making the API call, handling loading and error states, and invalidating relevant
+ * queries in the query cache.
+ */
+export const useAcceptFriendUser = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: async (userID: string) => {
+      await userService.acceptFriendRequest(userID);
+    },
+    onSuccess(_, userID) {
+      queryClient.invalidateQueries({ queryKey: ['currentUserInfo'] });
+
+      queryClient.invalidateQueries({ queryKey: ['otherUserInfo', userID] });
+    }
+  });
+  return {
+    mutateAcceptFriendUser: mutate,
+    isLoadingAcceptFriendUser: isPending,
+    isErrorAcceptFriendUser: isError,
+    isSuccessAcceptFriendUser: isSuccess
   };
 };
 

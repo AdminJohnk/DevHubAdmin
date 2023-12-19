@@ -33,15 +33,21 @@ export const useCurrentUserInfo = () => {
   const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ['currentUserInfo'],
     queryFn: async () => {
-      const [{ data: Followers }, { data: Following }, { data: userInfo }] =
-        await Promise.all([
-          userService.getFollowers(userID),
-          userService.getFollowing(userID),
-          userService.getUserInfoByID(userID)
-        ]);
+      const [
+        { data: Friends },
+        { data: RequestSent },
+        { data: requestReceived },
+        { data: userInfo }
+      ] = await Promise.all([
+        userService.getFriends(userID),
+        userService.getRequestSent(userID),
+        userService.getRequestReceived(userID),
+        userService.getUserInfoByID(userID)
+      ]);
 
-      userInfo.metadata.followers = Followers.metadata;
-      userInfo.metadata.following = Following.metadata;
+      userInfo.metadata.friends = Friends.metadata;
+      userInfo.metadata.requestSent = RequestSent.metadata;
+      userInfo.metadata.requestReceived = requestReceived.metadata;
       return ApplyDefaults(userInfo.metadata);
     },
     staleTime: Infinity,
@@ -73,18 +79,14 @@ export const useOtherUserInfo = (userID: string) => {
   const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ['otherUserInfo', userID],
     queryFn: async () => {
-      const [{ data: Followers }, { data: Following }, { data: userInfo }] =
-        await Promise.all([
-          userService.getFollowers(userID),
-          userService.getFollowing(userID),
-          userService.getUserInfoByID(userID)
-        ]);
+      const [{ data: Friends }, { data: userInfo }] = await Promise.all([
+        userService.getFriends(userID),
+        userService.getUserInfoByID(userID)
+      ]);
 
-      userInfo.metadata.followers = Followers.metadata;
-      userInfo.metadata.following = Following.metadata;
+      userInfo.metadata.friends = Friends.metadata;
       return ApplyDefaults(userInfo.metadata);
     },
-    enabled: !!userID,
     staleTime: Infinity
   });
 
@@ -316,23 +318,52 @@ export const useCommentsData = (postID: string) => {
   };
 };
 
-export const useGetCommentByPostForAdmin = (postID: string) => {
-  const { data, isPending, isError, isFetching } = useQuery({
-    queryKey: ['comments', postID],
+export const useGetParentCommentByPostForAdmin = (postID: string) => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['parentcomments', postID],
     queryFn: async () => {
-      const { data } = await adminService.getCommentByPostForAdmin(postID);
+      const { data } = await adminService.getParentCommentByPostForAdmin(
+        postID
+      );
       return data;
     },
+    enabled: !!postID,
     staleTime: Infinity
   });
 
   return {
-    isLoadingComments: isPending,
+    isLoadingParentComments: isPending,
     isErrorComments: isError,
-    comments: data?.metadata,
-    isFetchingComments: isFetching
+    parentComments: data?.metadata,
+    isFetchingComments: isFetching,
+    refetchParentComments: refetch
   };
-}
+};
+
+export const useGetChildCommentByParentCommentForAdmin = (
+  parentCommentID: string
+) => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['childcomments', parentCommentID],
+    queryFn: async () => {
+      const { data } =
+        await adminService.getChildCommentByParentCommentForAdmin(
+          parentCommentID
+        );
+      return data;
+    },
+    enabled: !!parentCommentID,
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingChildComments: !!parentCommentID ? isPending : false,
+    isErrorComments: isError,
+    childComments: data?.metadata,
+    isFetchingComments: isFetching,
+    refetchChildComments: refetch
+  };
+};
 
 /**
  * The `useGetRepository` function is a custom hook that retrieves repository data from GitHub API and
@@ -442,21 +473,21 @@ export const useCurrentConversationData = (
  * - `followers` is an array of followers.
  * - `isFetchingFollowers` is a boolean that indicates whether the query is currently fetching.
  */
-export const useFollowersData = (userID: string) => {
+export const useFriendsData = (userID: string) => {
   const { data, isPending, isError, isFetching } = useQuery({
-    queryKey: ['followers', userID],
+    queryKey: ['friends', userID],
     queryFn: async () => {
-      const { data } = await userService.getFollowers(userID);
+      const { data } = await userService.getFriends(userID);
       return data.metadata;
     },
     staleTime: Infinity
   });
 
   return {
-    isLoadingFollowers: isPending,
-    isErrorFollowers: isError,
-    followers: data!,
-    isFetchingFollowers: isFetching
+    isLoadingFriends: isPending,
+    isErrorFriends: isError,
+    friends: data!,
+    isFetchingFriends: isFetching
   };
 };
 
@@ -713,13 +744,13 @@ export const useCheckExistEmail = (email: string) => {
     checkEmail: data!,
     isFetchingMessageCall: isFetching
   };
-}
+};
 
-export const useGetUserForAdmin = () => {
+export const useGetUserForAdmin = (page: number, pagesize: number) => {
   const { data, isPending, isError, isFetching, refetch } = useQuery({
-    queryKey: ['userForAdmin'],
+    queryKey: ['userForAdmin', page, pagesize],
     queryFn: async () => {
-      const { data } = await adminService.getUserForAdmin();
+      const { data } = await adminService.getUserForAdmin(page, pagesize);
       return data.metadata;
     },
     staleTime: Infinity
@@ -734,11 +765,11 @@ export const useGetUserForAdmin = () => {
   };
 };
 
-export const useGetPostForAdmin = () => {
+export const useGetPostForAdmin = (page: number, pageSize: number) => {
   const { data, isPending, isError, isFetching, refetch } = useQuery({
-    queryKey: ['postForAdmin'],
+    queryKey: ['postForAdmin', page, pageSize],
     queryFn: async () => {
-      const { data } = await adminService.getPostForAdmin();
+      const { data } = await adminService.getPostForAdmin(page, pageSize);
       return data.metadata;
     },
     staleTime: Infinity
@@ -751,4 +782,42 @@ export const useGetPostForAdmin = () => {
     postListForAdmin: data!,
     isFetchingMessageCall: isFetching
   };
-}
+};
+
+export const useGetUserNumberForAdmin = () => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['userNumberForAdmin'],
+    queryFn: async () => {
+      const { data } = await adminService.getUserNumberForAdmin();
+      return data.metadata;
+    },
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingUserNumberForAdmin: isPending,
+    isErrorMessageCall: isError,
+    refetchUserNumberForAdmin: refetch,
+    userNumberForAdmin: data!,
+    isFetchingMessageCall: isFetching
+  };
+};
+
+export const useGetPostNumberForAdmin = () => {
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ['postNumberForAdmin'],
+    queryFn: async () => {
+      const { data } = await adminService.getPostNumberForAdmin();
+      return data.metadata;
+    },
+    staleTime: Infinity
+  });
+
+  return {
+    isLoadingPostNumberForAdmin: isPending,
+    isErrorMessageCall: isError,
+    refetchPostNumberForAdmin: refetch,
+    postNumberForAdmin: data!,
+    isFetchingMessageCall: isFetching
+  };
+};

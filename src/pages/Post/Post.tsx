@@ -1,24 +1,25 @@
 import React, { useMemo, useState } from 'react';
 import { ConfigProvider, Skeleton, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 import { getTheme } from '@/util/theme';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';
 import StyleProvider from './cssPost';
-import { useGetPostForAdmin } from '@/hooks/fetch';
+import { useGetPostForAdmin, useGetPostNumberForAdmin } from '@/hooks/fetch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTrash,
   faPenToSquare,
   faArrowsRotate,
-  faPlus
+  faPlus,
+  faComment
 } from '@fortawesome/free-solid-svg-icons';
 import { openDrawer } from '@/redux/Slice/DrawerHOCSlice';
 import DeleteModal from '@/components/PostProperties/DeletePostModal';
 import { openModal } from '@/redux/Slice/ModalHOCSlice';
 import EditPostForm from '@/components/Form/EditPostForm';
 import NewPost from '@/components/NewPost';
+import ShowComment from '@/components/ShowComment';
 
 const columns: ColumnsType<DataType> = [
   {
@@ -75,8 +76,14 @@ const Post = () => {
   };
   const [postID, setPostID] = useState<string>('');
 
+  const { postNumberForAdmin, refetchPostNumberForAdmin } =
+    useGetPostNumberForAdmin();
+
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+
   const { postListForAdmin, isLoadingPostForAdmin, refetchPostForAdmin } =
-    useGetPostForAdmin();
+    useGetPostForAdmin(page, pageSize);
 
   const data: DataType[] = useMemo(() => {
     return postListForAdmin?.map(post => {
@@ -102,7 +109,7 @@ const Post = () => {
           `Like: ${post.post_attributes.like_number} - Share: ${post.post_attributes.share_number}` +
           `\nComment: ${post.post_attributes.comment_number} - Save: ${post.post_attributes.save_number}`,
         action: (
-          <div className='flex flex-row justify-center'>
+          <div className='flex flex-row'>
             <div>
               <button
                 className='btn-edit'
@@ -130,22 +137,35 @@ const Post = () => {
               <button
                 className='btn-delete'
                 onClick={() => {
-                  showModal();
                   setPostID(post._id);
+                  showModal();
                 }}>
                 <FontAwesomeIcon size='1x' icon={faTrash} />
               </button>
             </div>
-            <div className='ml-3'>
-              <button
-                className='btn-delete'
-                onClick={() => {
-                  showModal();
-                  setPostID(post._id);
-                }}>
-                <FontAwesomeIcon size='1x' icon={faTrash} />
-              </button>
-            </div>
+            {post.post_attributes.comment_number > 0 && (
+              <div className='ml-3'>
+                <button
+                  className='btn-showComment'
+                  onClick={() => {
+                    dispatch(
+                      openDrawer({
+                        title: 'Edit post',
+                        component: (
+                          <ShowComment
+                            key={uuidv4().replace(/-/g, '')}
+                            typeCMT={'parent'}
+                            postID={post._id}
+                          />
+                        ),
+                        width: 1000
+                      })
+                    );
+                  }}>
+                  <FontAwesomeIcon size='1x' icon={faComment} />
+                </button>
+              </div>
+            )}
           </div>
         )
       };
@@ -163,61 +183,56 @@ const Post = () => {
 
   return (
     <ConfigProvider theme={{ token: themeColor }}>
-      {isLoadingPostForAdmin ? (
-        <StyleProvider theme={themeColorSet}>
-          <div className='admin-user'>
-            <div className='px-40 py-10'>
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
+      <StyleProvider theme={themeColorSet}>
+        <DeleteModal
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
+          postID={postID}
+        />
+        <div className='admin-user flex justify-center'>
+          <div className='w-11/12 mt-2'>
+            <div className='mb-5 flex flex-row'>
+              <button
+                className='btn-refresh'
+                onClick={() => {
+                  refetchPostForAdmin();
+                  refetchPostNumberForAdmin();
+                }}>
+                <FontAwesomeIcon icon={faArrowsRotate} size='lg' />
+              </button>
+              <button
+                className='btn-plus ms-3'
+                onClick={() => {
+                  dispatch(
+                    openModal({
+                      title: 'Create Post',
+                      component: <NewPost key={uuidv4().replace(/-/g, '')} />,
+                      footer: <></>
+                    })
+                  );
+                }}>
+                <FontAwesomeIcon icon={faPlus} size='lg' />
+              </button>
             </div>
+            <Table
+              className='content-table'
+              columns={columns}
+              dataSource={data}
+              onChange={onChange}
+              loading={isLoadingPostForAdmin}
+              pagination={{
+                pageSize: pageSize,
+                total: postNumberForAdmin,
+                onChange: (page, pageSize) => {
+                  setPage(page);
+                  setPageSize(pageSize || 20);
+                }
+              }}
+              scroll={{ y: 480 }}
+            />
           </div>
-        </StyleProvider>
-      ) : (
-        <StyleProvider theme={themeColorSet}>
-          <DeleteModal
-            isOpen={isModalOpen}
-            setIsOpen={setIsModalOpen}
-            postID={postID}
-          />
-          <div className='admin-user flex justify-center'>
-            <div className='w-11/12 mt-2'>
-              <div className='mb-5 flex flex-row'>
-                  <button
-                    className='btn-refresh'
-                    onClick={() => {
-                      refetchPostForAdmin();
-                    }}>
-                    <FontAwesomeIcon icon={faArrowsRotate} size='lg' />
-                  </button>
-                  <button
-                    className='btn-plus ms-3'
-                    onClick={() => {
-                      dispatch(
-                        openModal({
-                          title: 'Create Post',
-                          component: (
-                            <NewPost key={uuidv4().replace(/-/g, '')} />
-                          ),
-                          footer: <></>
-                        })
-                      );
-                    }}>
-                    <FontAwesomeIcon icon={faPlus} size='lg' />
-                  </button>
-              </div>
-              <Table
-                className='content-table'
-                columns={columns}
-                dataSource={data}
-                onChange={onChange}
-                pagination={{ pageSize: 20 }}
-                scroll={{ y: 480 }}
-              />
-            </div>
-          </div>
-        </StyleProvider>
-      )}
+        </div>
+      </StyleProvider>
     </ConfigProvider>
   );
 };

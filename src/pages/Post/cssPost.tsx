@@ -3,7 +3,6 @@ import { custom_scrollBar } from '@/util/cssVariable';
 import { commonColor } from '@/util/cssVariable';
 
 const StyleProvider = styled.div`
-  ${custom_scrollBar}
   .admin-user {
     min-height: calc(100vh - 5rem);
     height: fit-content;
@@ -13,7 +12,8 @@ const StyleProvider = styled.div`
     ${custom_scrollBar}
   }
   .btn-edit,
-  .btn-delete {
+  .btn-delete,
+  .btn-showComment {
     :hover {
       color: ${commonColor.colorBlue2};
       transition: 0.3s;

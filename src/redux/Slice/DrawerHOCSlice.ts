@@ -5,7 +5,8 @@ const initialState = {
   visible: false,
   ComponentContentDrawer: null,
   callBackSubmit: () => {},
-  loading: false
+  loading: false,
+  width: 720,
 };
 
 const drawerHOCSlide = createSlice({
@@ -17,6 +18,7 @@ const drawerHOCSlide = createSlice({
         ...state,
         title: action.payload.title,
         visible: true,
+        width: action.payload.width,
         ComponentContentDrawer: action.payload.component
       };
     },

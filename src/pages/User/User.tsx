@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getTheme } from '@/util/theme';
 import { useAppDispatch, useAppSelector } from '@/hooks/special';
 import StyleProvider from './cssUser';
-import { useGetUserForAdmin } from '@/hooks/fetch';
+import { useGetUserForAdmin, useGetUserNumberForAdmin } from '@/hooks/fetch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTrash,
@@ -18,88 +18,28 @@ import EditProfileForm from '@/components/Form/EditProfileForm';
 import DeleteModal from '@/components/DeleteUserModal';
 import { openModal } from '@/redux/Slice/ModalHOCSlice';
 import FormRegister from '../../components/Form/FormRegister/FormRegister';
+import { TablePaginationConfig } from 'antd/lib';
+import { FilterValue } from 'antd/es/table/interface';
 
 const columns: ColumnsType<DataType> = [
   {
     title: 'Name',
     dataIndex: 'name',
-    filters: [
-      {
-        text: 'Joe',
-        value: 'Joe'
-      },
-      {
-        text: 'Category 1',
-        value: 'Category 1',
-        children: [
-          {
-            text: 'Yellow',
-            value: 'Yellow'
-          },
-          {
-            text: 'Pink',
-            value: 'Pink'
-          }
-        ]
-      },
-      {
-        text: 'Category 2',
-        value: 'Category 2',
-        children: [
-          {
-            text: 'Green',
-            value: 'Green'
-          },
-          {
-            text: 'Black',
-            value: 'Black'
-          }
-        ]
-      }
-    ],
-    filterMode: 'tree',
-    filterSearch: true,
-    onFilter: (value: string, record) => record.name.includes(value),
     width: '20%'
   },
   {
     title: 'Email',
     dataIndex: 'email',
-    sorter: (a, b) => a.age - b.age,
     width: '23%'
   },
   {
     title: 'Expertises',
     dataIndex: 'expertises',
-    filters: [
-      {
-        text: 'London',
-        value: 'London'
-      },
-      {
-        text: 'New York',
-        value: 'New York'
-      }
-    ],
-    onFilter: (value: string, record) => record.address.startsWith(value),
-    filterSearch: true,
     width: '29%'
   },
   {
     title: 'Experiences',
     dataIndex: 'experiences',
-    filters: [
-      {
-        text: 'London',
-        value: 'London'
-      },
-      {
-        text: 'New York',
-        value: 'New York'
-      }
-    ],
-    onFilter: (value: string, record) => record.address.startsWith(value),
-    filterSearch: true,
     width: '20%'
   },
   {
@@ -130,8 +70,16 @@ const User = () => {
   };
   const [userID, setuserID] = useState<string>('');
 
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+
+  const {
+    userNumberForAdmin,
+    refetchUserNumberForAdmin
+  } = useGetUserNumberForAdmin();
+
   const { userListForAdmin, isLoadingUserForAdmin, refetchUserForAdmin } =
-    useGetUserForAdmin();
+    useGetUserForAdmin(page, pageSize);
 
   const data: DataType[] = useMemo(() => {
     return userListForAdmin?.map(user => {
@@ -208,17 +156,6 @@ const User = () => {
 
   return (
     <ConfigProvider theme={{ token: themeColor }}>
-      {isLoadingUserForAdmin ? (
-        <StyleProvider theme={themeColorSet}>
-          <div className='admin-user'>
-            <div className='px-40 py-10'>
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
-              <Skeleton className='mb-7' active paragraph={{ rows: 4 }} />
-            </div>
-          </div>
-        </StyleProvider>
-      ) : (
         <StyleProvider theme={themeColorSet}>
           <DeleteModal
             isOpen={isModalOpen}
@@ -232,6 +169,7 @@ const User = () => {
                   className='btn-refresh'
                   onClick={() => {
                     refetchUserForAdmin();
+                    refetchUserNumberForAdmin();
                   }}>
                   <FontAwesomeIcon icon={faArrowsRotate} size='lg' />
                 </button>
@@ -257,13 +195,20 @@ const User = () => {
                 columns={columns}
                 dataSource={data}
                 onChange={onChange}
-                pagination={{ pageSize: 50 }}
+                loading={isLoadingUserForAdmin}
+                pagination={{
+                  pageSize: pageSize,
+                  total: userNumberForAdmin,
+                  onChange: (page, pageSize) => {
+                    setPage(page);
+                    setPageSize(pageSize || 20);
+                  }
+                }}
                 scroll={{ y: 480 }}
               />
             </div>
           </div>
         </StyleProvider>
-      )}
     </ConfigProvider>
   );
 };

@@ -14,7 +14,7 @@ const DrawerHOC = () => {
   const { themeColorSet } = getTheme();
 
   // Hàm xử lý Drawer
-  const { visible, ComponentContentDrawer, callBackSubmit, title, loading } = useAppSelector(
+  const { visible, ComponentContentDrawer, callBackSubmit, title, loading, width } = useAppSelector(
     (state) => state.drawerHOC
   );
 
@@ -28,7 +28,7 @@ const DrawerHOC = () => {
         <Drawer
           destroyOnClose
           title={title}
-          width={720}
+          width={width || 720}
           onClose={onClose}
           open={visible}
           footer={

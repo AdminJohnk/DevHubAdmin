@@ -7,7 +7,9 @@ import {
   IUserInfo,
   IUserRegister,
   IPost,
-  ICreatePost
+  ICreatePost,
+  ICommentPost,
+  ICommentUpdate
 } from '@/types';
 import { BaseService } from './BaseService';
 
@@ -50,8 +52,8 @@ class AdminService extends BaseService {
   //   > => {
   //     return this.getGithub(`/users/repositories`);
   //   };
-  getUserForAdmin = (): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
-    return this.get(`/admin/users`);
+  getUserForAdmin = (page: number, pagesize: number): Promise<AxiosResponse<IResponse<IUserInfo[]>>> => {
+    return this.get(`/admin/users/${page}/${pagesize}`);
   };
   updateUserForAdmin = (
     userID: string,
@@ -69,21 +71,53 @@ class AdminService extends BaseService {
   ): Promise<AxiosResponse<IResponse<IUserInfo>>> => {
     return this.post(`/admin/users/create`, userRegister);
   };
-  getPostForAdmin = (): Promise<AxiosResponse<IResponse<IPost[]>>> => {
-    return this.get(`/admin/posts`);
+  getPostForAdmin = (page: number, pageSize: number): Promise<AxiosResponse<IResponse<IPost[]>>> => {
+    return this.get(`/admin/posts/${page}/${pageSize}`);
   };
-  updatePostForAdmin = (id: string, post: ICreatePost): Promise<AxiosResponse<IResponse<IPost>>> => {
+  updatePostForAdmin = (
+    id: string,
+    post: ICreatePost
+  ): Promise<AxiosResponse<IResponse<IPost>>> => {
     return this.put(`/admin/posts/update/${id}`, post);
   };
-  deletePostForAdmin = (id: string): Promise<AxiosResponse<IResponse<IPost>>> => {
+  deletePostForAdmin = (
+    id: string
+  ): Promise<AxiosResponse<IResponse<IPost>>> => {
     return this.delete(`/admin/posts/delete/${id}`);
   };
-  createPostForAdmin = (post: ICreatePost): Promise<AxiosResponse<IResponse<IPost>>> => {
+  createPostForAdmin = (
+    post: ICreatePost
+  ): Promise<AxiosResponse<IResponse<IPost>>> => {
     return this.post(`/admin/posts/create`, post);
   };
-  getCommentByPostForAdmin = (id: string): Promise<AxiosResponse<IResponse<IPost>>> => {
+  getParentCommentByPostForAdmin = (
+    id: string
+  ): Promise<AxiosResponse<IResponse<ICommentPost[]>>> => {
     return this.get(`/admin/comments/parents/${id}`);
-  }
+  };
+  getChildCommentByParentCommentForAdmin = (
+    id: string
+  ): Promise<AxiosResponse<IResponse<ICommentPost[]>>> => {
+    return this.get(`/admin/comments/children/${id}`);
+  };
+  updateCommentForAdmin = (
+    id: string,
+    comment: ICommentUpdate
+  ): Promise<AxiosResponse<IResponse<ICommentPost>>> => {
+    return this.put(`/admin/comments/update/${id}`, comment);
+  };
+  deleteCommentForAdmin = (
+    id: string,
+    type: string
+  ): Promise<AxiosResponse<IResponse<ICommentPost>>> => {
+    return this.delete(`/admin/comments/delete/${id}`, { type });
+  };
+  getUserNumberForAdmin = (): Promise<AxiosResponse<IResponse<number>>> => {
+    return this.get(`/admin/users/number`);
+  };
+  getPostNumberForAdmin = (): Promise<AxiosResponse<IResponse<number>>> => {
+    return this.get(`/admin/posts/number`);
+  };
 }
 
 export const adminService = new AdminService();

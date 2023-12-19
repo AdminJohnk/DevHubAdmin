@@ -1,18 +1,16 @@
 import { CommunityWrapper, PostWrapper, ProfileWrapper } from '@/Wrapper';
 
-import Login from '@/pages/Login';
+import Login from '@/pages/GetStarted/Login';
 import Register from '@/pages/Register';
 import { ForgotPassword, ResetPassword, VerifyCode } from '@/pages/ForgotPassword';
 import NewsFeed from '@/pages/NewsFeed/NewsFeed';
 import Chat from '@/pages/Chat';
 import SelectInterest from '@/pages/SelectInterest';
-import SelectFollow from '@/pages/SelectFollow';
 import SelectCommunity from '@/pages/SelectCommunity';
 import GetStarted from '@/pages/GetStarted';
 import NotFound404 from '@/pages/NotFound404';
 import DashBoard from '@/pages/DashBoard';
 import User from '@/pages/User';
-import Comment from '@/pages/Comment';
 
 import { VoiceCall, VideoCall } from '@/components/ChatComponents/MessageCall';
 
@@ -33,22 +31,6 @@ export const privateRoutes = [
     element: <MainLayout Component={<Post />} />
   },
   {
-    path: '/admin/comments',
-    element: <MainLayout Component={<Comment />} />
-  },
-  {
-    path: '/admin/conversations',
-    element: <MainLayout Component={<User />} />
-  },
-  {
-    path: '/admin/communities',
-    element: <MainLayout Component={<User />} />
-  },
-  {
-    path: '/admin/images',
-    element: <MainLayout Component={<User />} />
-  },
-  {
     path: '/',
     element: <MainLayout Component={<NewsFeed />} />
   },
@@ -59,10 +41,6 @@ export const privateRoutes = [
   {
     path: '/select-interest',
     element: <SelectInterest />
-  },
-  {
-    path: '/select-follow',
-    element: <SelectFollow />
   },
   {
     path: '/select-community',

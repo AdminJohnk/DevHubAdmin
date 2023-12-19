@@ -52,11 +52,7 @@ const MenuMain = () => {
     const pathMap: Record<string, string> = {
       '/dashboard': '1',
       '/admin/users': '2',
-      '/admin/posts': '3',
-      '/admin/comments': '4',
-      '/admin/conversations': '5',
-      '/admin/communities': '6',
-      '/admin/images': '7'
+      '/admin/posts': '3'
     };
     setKey(pathMap[path] ?? '');
   }, [location.pathname]);
@@ -131,11 +127,7 @@ const MenuMain = () => {
               key: '1',
               icon: <FontAwesomeIcon className='icon' icon={faHouse} />,
               label: 'Dashboard',
-              title: '',
-              onClick: () => {
-                navigate('/dashboard');
-                if (isXsScreen) setShowMenu(false);
-              }
+              title: ''
             },
             {
               key: '2',
@@ -154,46 +146,6 @@ const MenuMain = () => {
               title: '',
               onClick: () => {
                 navigate('/admin/posts');
-                if (isXsScreen) setShowMenu(false);
-              }
-            },
-            {
-              key: '4',
-              icon: <FontAwesomeIcon className='icon' icon={faComments} />,
-              label: 'Comments',
-              title: '',
-              onClick: () => {
-                navigate('/admin/comments');
-                if (isXsScreen) setShowMenu(false);
-              }
-            },
-            {
-              key: '5',
-              icon: <FontAwesomeIcon className='icon' icon={faMessage} />,
-              label: 'Conversations',
-              title: '',
-              onClick: () => {
-                navigate('/admin/conversations');
-                if (isXsScreen) setShowMenu(false);
-              }
-            },
-            {
-              key: '6',
-              icon: <FontAwesomeIcon className='icon' icon={faPeopleRoof} />,
-              label: 'Communities',
-              title: '',
-              onClick: () => {
-                navigate('/admin/communities');
-                if (isXsScreen) setShowMenu(false);
-              }
-            },
-            {
-              key: '7',
-              icon: <FontAwesomeIcon className='icon' icon={faImage} />,
-              label: 'Images',
-              title: '',
-              onClick: () => {
-                navigate('/admin/images');
                 if (isXsScreen) setShowMenu(false);
               }
             }
